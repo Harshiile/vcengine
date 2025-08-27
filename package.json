@@ -1,0 +1,16 @@
+{
+  "name": "version_control",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "node ./dist/index.js"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.3",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "zod": "^4.0.17"
+  }
+}

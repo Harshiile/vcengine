@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/@types/env.ts","./src/config/env.ts","./src/controllers/index.ts","./src/routes/index.ts"],"version":"5.8.3"}

@@ -1,0 +1,7 @@
+###
+GET http://localhost:3000/hash?videoName=long.mp4
+
+
+###
+GET http://localhost:3000/upload
+Content-Type: application/grpc
