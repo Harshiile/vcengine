@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { giveHash, uploadFile } from "../controllers";
+import { signupSchema } from "../@types/req";
+import { AuthController } from "../controllers/auth.controller";
+import { verifyRequest } from "../middleware/verifyRequest";
+import { AuthService } from "../services/auth.service";
 
 export const router = Router();
-
-router.get("/upload", uploadFile);
-// router.get("/get-stream");
-
-router.get("/hash", giveHash);
+const authController = new AuthController(new AuthService());
+router.post("/auth/signup", verifyRequest(signupSchema), authController.signup);

@@ -4,19 +4,6 @@ import fs from "fs";
 import path from "path";
 import process from "child_process";
 
-export const uploadFile = (req: Request, res: Response) => {
-  // fs.createReadStream(path.join(__dirname, `../../public/50mb.txt`)).pipe(
-  //   fs.createWriteStream(`./.txt`)
-  // );
-  const { videoName } = req.query;
-  const st = fs.createReadStream(
-    path.join(__dirname, `../../public/${videoName}`)
-  );
-  res.setHeader("Content-type", "video/mp4");
-  st.on("data", (data) => res.write(data));
-  st.on("end", () => res.end("DONE"));
-};
-
 export const giveHash = async (req: Request, res: Response) => {
   const { videoName } = req.query;
   const videoPath = path.join(__dirname, `../../public/${videoName}`);
