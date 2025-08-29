@@ -1,8 +1,6 @@
-import { hash } from "bcrypt";
+import { hash, compare } from "bcrypt";
 
 export class AuthService {
-  constructor() {}
-
   async signup(
     email: string,
     password: string,
@@ -15,7 +13,17 @@ export class AuthService {
     );
   }
 
-  async login(email: string, hashedPassword: string) {
-    // console.log()
+  async login(email: string, password: string) {
+    const hashedPassword = "............"; // Get from DB
+    if (await compare(password, hashedPassword)) {
+      // Password Correct
+      console.log(`${email} login via password : ${password}`);
+    }
   }
+
+  async logout() {}
+
+  async getUser() {}
+
+  async updateUser() {}
 }

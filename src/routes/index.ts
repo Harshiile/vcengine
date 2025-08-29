@@ -1,9 +1,6 @@
-import { Router } from "express";
-import { signupSchema } from "../@types/req";
-import { AuthController } from "../controllers/auth.controller";
-import { verifyRequest } from "../middleware/verifyRequest";
-import { AuthService } from "../services/auth.service";
+import { authRouter } from "./auth.router";
+import { videoRouter } from "./video.router";
+import { collabRouter } from "./collaborate.router";
+import { workspaceRouter } from "./workspace.router";
 
-export const router = Router();
-const authController = new AuthController(new AuthService());
-router.post("/auth/signup", verifyRequest(signupSchema), authController.signup);
+export { workspaceRouter, collabRouter, videoRouter, authRouter };

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodError, ZodObject } from "zod";
 
-export const verifyRequest = (schema: ZodObject) => {
+export const requestValidator = (schema: ZodObject) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse({

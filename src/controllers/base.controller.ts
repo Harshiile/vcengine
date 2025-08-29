@@ -4,7 +4,7 @@ export class BaseController {
     req: Request,
     res: Response,
     next: NextFunction,
-    action: () => Promise<void>
+    action: () => Promise<any>
   ) {
     try {
       const result = await action();
