@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model User {
+  id           Int     @id @default(autoincrement())
+  name         String
+  username     String
+  email        String
+  password     String
+  refreshToken String
+  avatar       String?
+
+  Workspace    Workspace[]
+  Branch       Branch[]
+  PullRequests PullRequests[]
+  Fork         Fork[]
+  Comment      Comment[]
+  Permission   Permission[]
+  Videos       Videos[]
+}
+
+enum WorkspaceType {
+  Public
+  Private
+}
+
+model Workspace {
+  id        Int           @id @default(autoincrement())
+  createdBy Int
+  createdAt DateTime      @default(now())
+  name      String
+  type      WorkspaceType
+  banner    String?
+
+  User User @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  Branch       Branch[]
+  PullRequests PullRequests[]
+  Fork         Fork[]
+  Comment      Comment[]
+  Permission   Permission[]
+  Videos       Videos[]
+}
+
+model Videos {
+  id          Int      @id @default(autoincrement())
+  atWorkspace Int
+  version     Int      @default(1)
+  branch      Int
+  duration    Int
+  size        Int
+  createdBy   Int
+  resolution  Int
+  frameRate   Int
+  chunks      String[]
+  createdAt   DateTime @default(now())
+
+  Workspace Workspace @relation(fields: [atWorkspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Branch    Branch    @relation(fields: [branch], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Chunk     Chunk     @relation(fields: [chunks], references: [hash], onUpdate: Cascade)
+}
+
+model Chunk {
+  hash      String   @id
+  instances Int      @default(1)
+  url       String
+  size      Int
+  duration  Int
+  Videos    Videos[]
+}
+
+model Branch {
+  id        Int      @id @default(autoincrement())
+  createdBy Int
+  createdOn Int
+  atVersion Int
+  name      String
+  createdAt DateTime @default(now())
+
+  User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [createdOn], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Videos    Videos[]
+}
+
+enum PRType {
+  Draft
+  Open
+  Reviewed
+  Merged
+  Closed
+}
+
+model PullRequests {
+  id        Int      @id
+  createdOn Int
+  createdBy Int
+  createdAt DateTime @default(now())
+  state     PRType
+
+  User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [createdOn], references: [id], onUpdate: Cascade)
+}
+
+// model Issues {
+//   issueNumber Int      @id @default(autoincrement())
+//   issueBy     Int
+//   createdOn   Int
+//   createdAt   DateTime @default(now())
+//   message     String
+//   labels      String[]
+
+//   User      User      @relation(fields: [issueBy], references: [id])
+//   Workspace Workspace @relation(fields: [createdOn], references: [id])
+// }
+
+model Fork {
+  id         Int @id @default(autoincrement())
+  forkedFrom Int
+  forkedBy   Int
+
+  User      User      @relation(fields: [forkedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [forkedFrom], references: [id], onUpdate: Cascade)
+}
+
+model Comment {
+  id          Int    @id @default(autoincrement())
+  message     String
+  commentedBy Int
+  commentOn   Int
+  timestamp   Int
+
+  User      User      @relation(fields: [commentedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [commentOn], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+enum PermissionType {
+  Viewer // Only can see
+  Reviewer // Can comment also
+  Editor // Editor
+  Full // Can do delete
+}
+
+model Permission {
+  id          Int            @id @default(autoincrement())
+  onWorkspace Int
+  type        PermissionType
+  onUser      Int
+
+  User      User      @relation(fields: [onUser], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [onWorkspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+// model OAuthAccount {
+//   id           Int      @id @default(autoincrement())
+//   userId       Int
+//   provider     String
+//   providerId   String
+//   refreshToken String
+//   expiresAt    DateTime
+//   createAt     DateTime @default(now())
+// }

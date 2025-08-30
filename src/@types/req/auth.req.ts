@@ -2,8 +2,10 @@ import { z } from "zod";
 import { notProvidedError } from "./utils/not-provided";
 
 export const loginSchema = z.object({
-  email: z.email(notProvidedError("Email")),
-  password: z.string().min(8, { error: "Password is too short" }),
+  body: z.object({
+    email: z.email(notProvidedError("Email")),
+    password: z.string().min(8, { error: "Password is too short" }),
+  }),
 });
 
 export const signupSchema = z.object({

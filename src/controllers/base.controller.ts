@@ -8,9 +8,9 @@ export class BaseController {
   ) {
     try {
       const result = await action();
-      res.json(result);
-    } catch (error) {
-      throw new Error("Catch In Base Request");
+      res.json({ sucess: true, ...result });
+    } catch (err) {
+      next(err);
     }
   }
 }

@@ -18,13 +18,5 @@ authRouter.post("/login", requestValidator(loginSchema), authController.login);
 
 authRouter.post("/logout", authController.logout);
 
-authRouter.get(
-  "/user/:id",
-  requestValidator(loginSchema),
-  authController.getUser
-);
-authRouter.put(
-  "/user/:id",
-  requestValidator(loginSchema),
-  authController.updateUser
-);
+authRouter.get("/user/:id", authController.getUser);
+authRouter.put("/user/:id", authController.updateUser);
