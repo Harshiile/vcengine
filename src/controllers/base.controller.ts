@@ -8,7 +8,7 @@ export class BaseController {
   ) {
     try {
       const result = await action();
-      res.json({ sucess: true, ...result });
+      res.json({ success: true, result });
     } catch (err) {
       next(err);
     }

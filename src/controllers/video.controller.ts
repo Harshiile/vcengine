@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { VideoService } from "../services/video.service";
+import busboy from "busboy";
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
@@ -9,7 +10,10 @@ export class VideoController extends BaseController {
 
   uploadVideo = (req: Request, res: Response, next: NextFunction) => {
     this.baseRequest(req, res, next, () => {
-      return this.videoService.uploadVideo();
+      const bb = busboy({ headers: req.headers });
+      const fileSize = req.headers["content-length"];
+      req.pipe(bb);
+      return this.videoService.uploadVideo(bb, fileSize!);
     });
   };
 
