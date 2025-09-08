@@ -20,7 +20,7 @@ export class AuthService {
     if (user) throw new Error("User already exists");
 
     const hashedPassword = await hash(password, 5);
-    const { refreshToken } = this.getTokens(email, username);
+    const { refreshToken, accessToken } = this.getTokens(email, username);
 
     prisma.user
       .create({
@@ -35,6 +35,8 @@ export class AuthService {
       .catch((err) => {
         throw new Error(err.message);
       });
+
+    return { accessToken };
   }
 
   async login(email: string, password: string) {
@@ -66,7 +68,7 @@ export class AuthService {
         throw new Error(err.message);
       });
 
-    return user;
+    return { accessToken, user };
   }
 
   async logout() {}

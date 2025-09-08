@@ -15,21 +15,21 @@ datasource db {
 }
 
 model User {
-  id           Int     @id @default(autoincrement())
+  id           String   @id @default(uuid())
   name         String
-  username     String
-  email        String
-  password     String
-  refreshToken String
-  avatar       String?
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  refreshToken String   @unique
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
 
   Workspace    Workspace[]
   Branch       Branch[]
   PullRequests PullRequests[]
-  Fork         Fork[]
-  Comment      Comment[]
-  Permission   Permission[]
-  Videos       Videos[]
+  Issues       Issues[]
+  Comments     Comments[]
+  Permissions  Permissions[]
 }
 
 enum WorkspaceType {
@@ -38,138 +38,189 @@ enum WorkspaceType {
 }
 
 model Workspace {
-  id        Int           @id @default(autoincrement())
-  createdBy Int
-  createdAt DateTime      @default(now())
+  id        String        @id @default(uuid())
+  createdBy String
   name      String
   type      WorkspaceType
   banner    String?
+  // activeBranch String
+  createdAt DateTime      @default(now())
 
   User User @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // ActiveBranch Branch @relation(fields: [activeBranch], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  Videos       Videos[]
   Branch       Branch[]
   PullRequests PullRequests[]
-  Fork         Fork[]
-  Comment      Comment[]
-  Permission   Permission[]
-  Videos       Videos[]
+  Issues       Issues[]
+  Permissions  Permissions[]
 }
 
 model Videos {
-  id          Int      @id @default(autoincrement())
-  atWorkspace Int
-  version     Int      @default(1)
-  branch      Int
-  duration    Int
-  size        Int
-  createdBy   Int
-  resolution  Int
-  frameRate   Int
-  chunks      String[]
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  title     String   @default("Untitled Video")
+  workspace String
+  width     Int
+  height    Int
+  createdAt DateTime @default(now())
 
-  Workspace Workspace @relation(fields: [atWorkspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Branch    Branch    @relation(fields: [branch], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Chunk     Chunk     @relation(fields: [chunks], references: [hash], onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  Segment       Segment[]
+  VideoVersions VideoVersions[]
 }
 
-model Chunk {
-  hash      String   @id
-  instances Int      @default(1)
-  url       String
-  size      Int
-  duration  Int
-  Videos    Videos[]
+model Segment {
+  id               String @id @default(uuid())
+  videoId          String
+  hash             String @unique
+  numberOfInstance Int    @default(1)
+  url              String @unique
+  index            Int
+  duration         Int
+  size             Int
+
+  Video Videos @relation(references: [id], fields: [videoId])
 }
 
 model Branch {
-  id        Int      @id @default(autoincrement())
-  createdBy Int
-  createdOn Int
-  atVersion Int
-  name      String
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  name        String
+  workspace   String
+  createdBy   String
+  headVersion String
+  createdAt   DateTime @default(now())
 
+  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
   User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace @relation(fields: [createdOn], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Videos    Videos[]
+  Version   Versions  @relation(fields: [headVersion], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Versions {
+  id            String   @id @default(uuid())
+  branch        String
+  commitMessage String
+  parentVersion String?
+  createdAt     DateTime @default(now())
+
+  parent   Versions?  @relation("versionToChildern", fields: [parentVersion], references: [id])
+  children Versions[] @relation("versionToChildern")
+  // Version  Versions   @relation(references: [id], fields: [parentVersion])
+  // Branch   Branch     @relation(references: [id], fields: [branch])
+
+  VideoVersions VideoVersions[]
+  Branch        Branch[]
+}
+
+enum changeType {
+  Add
+  Modified
+  Revert
+  Remove
+}
+
+model VideoVersions {
+  id         String     @id @default(uuid())
+  video      String
+  version    String
+  changeType changeType
+
+  Video    Videos   @relation(references: [id], fields: [video])
+  Versions Versions @relation(references: [id], fields: [version])
 }
 
 enum PRType {
-  Draft
   Open
-  Reviewed
   Merged
   Closed
 }
 
 model PullRequests {
-  id        Int      @id
-  createdOn Int
-  createdBy Int
+  id        String   @id @default(uuid())
+  workspace String
+  createdBy String
   createdAt DateTime @default(now())
   state     PRType
 
-  User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace @relation(fields: [createdOn], references: [id], onUpdate: Cascade)
+  User      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace  @relation(fields: [workspace], references: [id], onUpdate: Cascade)
+  Comments  Comments[]
 }
 
-// model Issues {
-//   issueNumber Int      @id @default(autoincrement())
-//   issueBy     Int
-//   createdOn   Int
-//   createdAt   DateTime @default(now())
-//   message     String
-//   labels      String[]
-
-//   User      User      @relation(fields: [issueBy], references: [id])
-//   Workspace Workspace @relation(fields: [createdOn], references: [id])
-// }
-
-model Fork {
-  id         Int @id @default(autoincrement())
-  forkedFrom Int
-  forkedBy   Int
-
-  User      User      @relation(fields: [forkedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace @relation(fields: [forkedFrom], references: [id], onUpdate: Cascade)
+enum IssuesState {
+  Open
+  Closed
 }
 
-model Comment {
-  id          Int    @id @default(autoincrement())
+model Issues {
+  id          String      @id @default(uuid())
+  issueNumber Int
+  createdBy   String
+  workspace   String
   message     String
-  commentedBy Int
-  commentOn   Int
-  timestamp   Int
+  state       IssuesState
+  createdAt   DateTime    @default(now())
 
-  User      User      @relation(fields: [commentedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace @relation(fields: [commentOn], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User      User      @relation(fields: [createdBy], references: [id])
+  Workspace Workspace @relation(fields: [workspace], references: [id])
+
+  Comments Comments[]
 }
+
+// model Forks {
+//   id              String   @id @default(uuid())
+//   sourceWorkspace String
+//   destWorkspace   String
+//   forkedBy        String
+//   onVersion       String
+//   createdAt       DateTime @default(now())
+
+//   User           User      @relation(fields: [forkedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   Version        Versions  @relation(fields: [onVersion], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   Workspace_Src  Workspace @relation(fields: [destWorkspace], references: [id], onUpdate: Cascade)
+//   Workspace_Dest Workspace @relation(fields: [sourceWorkspace], references: [id], onUpdate: Cascade)
+// }
 
 enum PermissionType {
-  Viewer // Only can see
-  Reviewer // Can comment also
-  Editor // Editor
-  Full // Can do delete
+  Viewer
+  Editor
+  Owner
 }
 
-model Permission {
-  id          Int            @id @default(autoincrement())
-  onWorkspace Int
-  type        PermissionType
-  onUser      Int
+model Permissions {
+  id        String         @id @default(uuid())
+  workspace String
+  role      PermissionType
+  userId    String
+  grantedBy String
+  createdAt DateTime       @default(now())
 
-  User      User      @relation(fields: [onUser], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace @relation(fields: [onWorkspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // User_To    User      @relation("UserFK", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // User_Grant User      @relation("grantUserFK", fields: [grantedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User      User      @relation(fields: [userId], references: [id])
 }
 
-// model OAuthAccount {
-//   id           Int      @id @default(autoincrement())
-//   userId       Int
-//   provider     String
-//   providerId   String
-//   refreshToken String
-//   expiresAt    DateTime
-//   createAt     DateTime @default(now())
-// }
+enum TargetType {
+  Issue
+  PR
+}
+
+model Comments {
+  id         String     @id @default(uuid())
+  message    String
+  createdBy  String
+  targetType TargetType
+  targetId   String
+  createdAt  DateTime   @default(now())
+
+  User           User          @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // PullRequests PullRequests? @relation(fields: [targetId], references: [id])
+  // pullRequestsId String?
+  // Issues       Issues?       @relation(fields: [targetId], references: [id])
+  // issuesId       String?
+  PullRequests   PullRequests? @relation(fields: [pullRequestsId], references: [id])
+  pullRequestsId String?
+  Issues         Issues?       @relation(fields: [issuesId], references: [id])
+  issuesId       String?
+}

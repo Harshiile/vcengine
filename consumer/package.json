@@ -1,0 +1,14 @@
+{
+  "name": "sqs_consumer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.883.0",
+    "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1"
+  }
+}

@@ -9,24 +9,32 @@ export class AuthController extends BaseController {
   }
 
   signup = (req: Request, res: Response, next: NextFunction): void => {
-    this.baseRequest(req, res, next, () => {
+    this.baseRequest(req, res, next, async () => {
       const { email, password, username, name } = req.body;
-      return this.authService.signup(email, password, username, name);
+      const { accessToken } = await this.authService.signup(
+        email,
+        password,
+        username,
+        name
+      );
+      res.cookie("auth-acs", accessToken);
     });
   };
 
   login = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
       const { email, password } = req.body;
-      return this.authService.login(email, password).then((user) => {
-        return { message: "Login Successful", user };
-      });
+      const { user, accessToken } = await this.authService.login(
+        email,
+        password
+      );
+      res.cookie("auth-acs", accessToken);
     });
   };
 
   logout = (req: Request, res: Response, next: NextFunction): void => {
-    this.baseRequest(req, res, next, () => {
-      return this.authService.logout();
+    this.baseRequest(req, res, next, async () => {
+      res.clearCookie("auth-acs");
     });
   };
 
