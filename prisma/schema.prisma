@@ -15,21 +15,18 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  username     String   @unique
-  email        String   @unique
-  passwordHash String
-  refreshToken String   @unique
-  avatarUrl    String?
-  createdAt    DateTime @default(now())
+  id            String   @id @default(uuid())
+  name          String
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  refreshToken  String   @unique
+  avatarUrl     String?
+  createdAt     DateTime @default(now())
+  lastUpdatedAt DateTime
 
-  Workspace    Workspace[]
-  Branch       Branch[]
-  PullRequests PullRequests[]
-  Issues       Issues[]
-  Comments     Comments[]
-  Permissions  Permissions[]
+  Workspace Workspace[]
+  Branch    Branch[]
 }
 
 enum WorkspaceType {
@@ -38,49 +35,38 @@ enum WorkspaceType {
 }
 
 model Workspace {
-  id        String        @id @default(uuid())
-  createdBy String
-  name      String
-  type      WorkspaceType
-  banner    String?
-  // activeBranch String
-  createdAt DateTime      @default(now())
+  id           String        @id @default(uuid())
+  createdBy    String
+  name         String
+  type         WorkspaceType
+  banner       String?
+  activeBranch String
+  createdAt    DateTime      @default(now())
 
   User User @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
   // ActiveBranch Branch @relation(fields: [activeBranch], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  Videos       Videos[]
-  Branch       Branch[]
-  PullRequests PullRequests[]
-  Issues       Issues[]
-  Permissions  Permissions[]
+  Videos Videos[]
+  Branch Branch[]
 }
 
 model Videos {
-  id        String   @id @default(uuid())
-  title     String   @default("Untitled Video")
-  workspace String
-  width     Int
-  height    Int
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  title        String   @default("Untitled Video")
+  workspace    String
+  width        Int
+  height       Int
+  playlistFile String
+  createdAt    DateTime @default(now())
 
-  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  Segment       Segment[]
+  Workspace     Workspace       @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
   VideoVersions VideoVersions[]
 }
 
 model Segment {
   id               String @id @default(uuid())
-  videoId          String
   hash             String @unique
   numberOfInstance Int    @default(1)
-  url              String @unique
-  index            Int
-  duration         Int
-  size             Int
-
-  Video Videos @relation(references: [id], fields: [videoId])
 }
 
 model Branch {
@@ -129,43 +115,43 @@ model VideoVersions {
   Versions Versions @relation(references: [id], fields: [version])
 }
 
-enum PRType {
-  Open
-  Merged
-  Closed
-}
+// enum PRType {
+//   Open
+//   Merged
+//   Closed
+// }
 
-model PullRequests {
-  id        String   @id @default(uuid())
-  workspace String
-  createdBy String
-  createdAt DateTime @default(now())
-  state     PRType
+// model PullRequests {
+//   id        String   @id @default(uuid())
+//   workspace String
+//   createdBy String
+//   createdAt DateTime @default(now())
+//   state     PRType
 
-  User      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace  @relation(fields: [workspace], references: [id], onUpdate: Cascade)
-  Comments  Comments[]
-}
+//   User      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   Workspace Workspace  @relation(fields: [workspace], references: [id], onUpdate: Cascade)
+//   Comments  Comments[]
+// }
 
-enum IssuesState {
-  Open
-  Closed
-}
+// enum IssuesState {
+//   Open
+//   Closed
+// }
 
-model Issues {
-  id          String      @id @default(uuid())
-  issueNumber Int
-  createdBy   String
-  workspace   String
-  message     String
-  state       IssuesState
-  createdAt   DateTime    @default(now())
+// model Issues {
+//   id          String      @id @default(uuid())
+//   issueNumber Int
+//   createdBy   String
+//   workspace   String
+//   message     String
+//   state       IssuesState
+//   createdAt   DateTime    @default(now())
 
-  User      User      @relation(fields: [createdBy], references: [id])
-  Workspace Workspace @relation(fields: [workspace], references: [id])
+//   User      User      @relation(fields: [createdBy], references: [id])
+//   Workspace Workspace @relation(fields: [workspace], references: [id])
 
-  Comments Comments[]
-}
+//   Comments Comments[]
+// }
 
 // model Forks {
 //   id              String   @id @default(uuid())
@@ -181,46 +167,46 @@ model Issues {
 //   Workspace_Dest Workspace @relation(fields: [sourceWorkspace], references: [id], onUpdate: Cascade)
 // }
 
-enum PermissionType {
-  Viewer
-  Editor
-  Owner
-}
+// enum PermissionType {
+//   Viewer
+//   Editor
+//   Owner
+// }
 
-model Permissions {
-  id        String         @id @default(uuid())
-  workspace String
-  role      PermissionType
-  userId    String
-  grantedBy String
-  createdAt DateTime       @default(now())
+// model Permissions {
+//   id        String         @id @default(uuid())
+//   workspace String
+//   role      PermissionType
+//   userId    String
+//   grantedBy String
+//   createdAt DateTime       @default(now())
 
-  // User_To    User      @relation("UserFK", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  // User_Grant User      @relation("grantUserFK", fields: [grantedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  User      User      @relation(fields: [userId], references: [id])
-}
+//   // User_To    User      @relation("UserFK", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   // User_Grant User      @relation("grantUserFK", fields: [grantedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   User      User      @relation(fields: [userId], references: [id])
+// }
 
-enum TargetType {
-  Issue
-  PR
-}
+// enum TargetType {
+//   Issue
+//   PR
+// }
 
-model Comments {
-  id         String     @id @default(uuid())
-  message    String
-  createdBy  String
-  targetType TargetType
-  targetId   String
-  createdAt  DateTime   @default(now())
+// model Comments {
+//   id         String     @id @default(uuid())
+//   message    String
+//   createdBy  String
+//   targetType TargetType
+//   targetId   String
+//   createdAt  DateTime   @default(now())
 
-  User           User          @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  // PullRequests PullRequests? @relation(fields: [targetId], references: [id])
-  // pullRequestsId String?
-  // Issues       Issues?       @relation(fields: [targetId], references: [id])
-  // issuesId       String?
-  PullRequests   PullRequests? @relation(fields: [pullRequestsId], references: [id])
-  pullRequestsId String?
-  Issues         Issues?       @relation(fields: [issuesId], references: [id])
-  issuesId       String?
-}
+//   User           User          @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   // PullRequests PullRequests? @relation(fields: [targetId], references: [id])
+//   // pullRequestsId String?
+//   // Issues       Issues?       @relation(fields: [targetId], references: [id])
+//   // issuesId       String?
+//   PullRequests   PullRequests? @relation(fields: [pullRequestsId], references: [id])
+//   pullRequestsId String?
+//   Issues         Issues?       @relation(fields: [issuesId], references: [id])
+//   issuesId       String?
+// }

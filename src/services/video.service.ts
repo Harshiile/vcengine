@@ -6,65 +6,48 @@ import { Readable, Stream } from "stream";
 import { prisma } from "../db";
 import path from "path";
 import { spawn } from "child_process";
+import { s3 } from "../config/s3";
+import { GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { BUCKETS } from "../config/buckets";
 
 // POST   /video/upload-on/{provider}/{id}   —   Upload on third-party streaming platform
 
 export class VideoService {
-  private async driveUpload(
-    drive: drive_v2.Drive,
-    fileName: string,
-    mimeType: string,
-    Stream: Stream.Readable
-  ) {
-    return drive.files
-      .insert(
-        {
-          requestBody: {
-            title: fileName,
-            parents: [{ id: ENV.DRIVE_VIDEO_FOLDER_ID }],
-          },
-          media: {
-            mimeType,
-            body: Stream,
-          },
-          fields: "id",
-        },
-        {
-          onUploadProgress(progress) {
-            const { bytesRead } = progress;
-            // console.log(
-            //   `Uploading - ${
-            //     100 * Number((bytesRead / fileSize).toPrecision(2))
-            //   } %`
-            // );
-          },
-        }
-      )
-      .then(({ data }) => {
-        return data.id;
+  private async getStream(fileKey: string, bucketName: string) {
+    const { Body } = await s3.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: fileKey,
       })
-      .catch((err) => {
-        throw new Error(err.message);
-      });
+    );
+    return Body;
+  }
+  async uploadVideo(bb: busboy.Busboy, fileSize: string) {}
+
+  async getPlaylist(fileKey: string) {
+    return (await this.getStream(fileKey, BUCKETS.VC_PLAYLIST)) as Stream;
   }
 
-  async uploadVideo(bb: busboy.Busboy, fileSize: string) {
-    return new Promise((resolve, reject) => {
-      const authClient = new google.auth.GoogleAuth({
-        credentials: JSON.parse(ENV.DRIVE_SERVICE_ACCOUNT_CREDENTIALS),
-        scopes: ["https://www.googleapis.com/auth/drive"],
-      });
+  async getSegment(segmentKey: string) {
+    return (await this.getStream(segmentKey, BUCKETS.VC_SEGMENTS)) as Stream;
+  }
 
-      const drive = google.drive({ version: "v2", auth: authClient });
-
-      bb.on("file", async (fieldName, Stream, fileInfo) => {});
-
-      bb.on("finish", () => {
-        console.log("Uploading Stream Finish");
-      });
+  async getmaxResolution(workspace: string) {
+    const { Contents } = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: BUCKETS.VC_PLAYLIST,
+        Prefix: workspace,
+      })
+    );
+    let maxResolution = 0;
+    Contents?.map((file) => {
+      const playlistName = file.Key?.split("/")[1];
+      const resolution = playlistName?.split("_")[1]?.split(".")[0];
+      maxResolution = Math.max(maxResolution, Number(resolution));
     });
+    return maxResolution;
   }
-  async streamVideo() {}
+
   async downloadVideo() {}
   async createVersion() {}
   async getVersions() {}

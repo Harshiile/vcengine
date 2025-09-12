@@ -6,9 +6,11 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.883.0",
+    "dockerode": "^4.0.8",
     "dotenv": "^17.2.2"
   },
   "devDependencies": {
+    "@types/dockerode": "^3.3.43",
     "@types/node": "^24.3.1"
   }
 }

@@ -28,7 +28,7 @@ export class AuthService {
           name,
           username,
           email,
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           refreshToken,
         },
       })
@@ -48,7 +48,7 @@ export class AuthService {
 
     if (!user) throw new Error("User not exists");
 
-    if (!(await compare(password, user.password)))
+    if (!(await compare(password, user.passwordHash)))
       throw new Error("Password Incorrect");
 
     // Password Correct
@@ -71,9 +71,13 @@ export class AuthService {
     return { accessToken, user };
   }
 
-  async logout() {}
-
   async getUser() {}
 
-  async updateUser() {}
+  async updateUser() {
+    // which thing can update
+    // name
+    // username
+    // passwordHash
+    // avatarUrl
+  }
 }

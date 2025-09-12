@@ -6,8 +6,10 @@ import {
   authRouter,
 } from "./routes";
 import { errorHandler } from "./middleware/errorHandler";
+import cors from "cors";
 
 export const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

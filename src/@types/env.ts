@@ -4,6 +4,6 @@ export const envSchema = z.object({
   JWT_SECRET: z.string(),
   DB_URL: z.string(),
   DEFAULT_AVATAR: z.string(),
-  DRIVE_VIDEO_FOLDER_ID: z.string(),
-  DRIVE_SERVICE_ACCOUNT_CREDENTIALS: z.string(),
+  IAM_ACCESS_KEY_ID: z.string(),
+  IAM_SECRET_KEY: z.string(),
 });
