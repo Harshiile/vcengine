@@ -1,6 +1,6 @@
 import {
-  GetQueueUrlCommand,
   ReceiveMessageCommand,
+  DeleteMessageCommand,
   SQSClient,
 } from "@aws-sdk/client-sqs";
 import dotenv from "dotenv";
@@ -8,6 +8,8 @@ import Docker from "dockerode";
 import path from "path";
 dotenv.config();
 
+const sqsUrl =
+  "https://sqs.ap-south-1.amazonaws.com/280428163167/s3-to-consumer-connecter";
 const init = async () => {
   const accessKeyId = process.env.ACCESS_KEY;
   const secretAccessKey = process.env.SECRET_KEY;
@@ -24,8 +26,7 @@ const init = async () => {
   });
 
   const command = new ReceiveMessageCommand({
-    QueueUrl:
-      "https://sqs.ap-south-1.amazonaws.com/280428163167/s3-to-consumer-connecter",
+    QueueUrl: sqsUrl,
     MaxNumberOfMessages: 3,
     WaitTimeSeconds: 3,
   });
@@ -35,12 +36,17 @@ const init = async () => {
     if (!Messages) console.log("No messages");
     else {
       for (const msg of Messages) {
-        if (msg.Body) {
-          const records = JSON.parse(msg.Body).Records;
+        const { Body, ReceiptHandle } = msg;
+        if (Body) {
+          console.log(JSON.parse(Body));
+
+          const records = JSON.parse(Body).Records;
           if (records) {
+            console.log(records);
+
             const {
               s3: { object, bucket },
-            } = JSON.parse(msg.Body).Records[0];
+            } = JSON.parse(Body).Records[0];
             console.log({ object, bucket });
 
             const videoName = object.key;
@@ -49,36 +55,41 @@ const init = async () => {
             // Spin the docker image in ECR via ECS fragmate
             // ....
             // Do volume mapping with folder /output which contain playlist.m3u8 files for multiple resolution
-            new Promise(async (resolve, reject) => {
-              const docker = new Docker();
-              const container = await docker.createContainer({
-                Image: "transcoder-segmentor",
-                name: `transcoder_instance_${Date.now()}`,
-                HostConfig: {
-                  Binds: [`${path.resolve(".")}:/app/output`],
-                },
-                Env: [
-                  `WORKSPACE=xyz`,
-                  `VIDEO_NAME=${videoName}`,
-                  `ACCESS_KEY=${accessKeyId}`,
-                  `SECRET_KEY=${secretAccessKey}`,
-                ],
-              });
-              const logs = await container.attach({
-                stream: true,
-                stdout: true,
-                stderr: true,
-              });
+            // new Promise(async (resolve, reject) => {
+            //   const docker = new Docker();
+            //   const container = await docker.createContainer({
+            //     Image: "transcoder-segmentor",
+            //     name: `transcoder_instance_${Date.now()}`,
+            //     HostConfig: {
+            //       Binds: [`${path.resolve(".")}:/app/output`],
+            //     },
+            //     Env: [
+            //       `WORKSPACE=xyz`,
+            //       `VIDEO_NAME=${videoName}`,
+            //       `ACCESS_KEY=${accessKeyId}`,
+            //       `SECRET_KEY=${secretAccessKey}`,
+            //     ],
+            //   });
+            //   const logs = await container.attach({
+            //     stream: true,
+            //     stdout: true,
+            //     stderr: true,
+            //   });
 
-              logs.on("data", (data) => console.log(data.toString()));
-              await container.start().catch(reject);
+            //   logs.on("data", (data) => console.log(data.toString()));
+            //   await container.start().catch(reject);
 
-              const result = await container.wait();
-              resolve(result);
-            });
+            //   const result = await container.wait();
+            //   resolve(result);
+            // });
 
             // Message Delete
-            //...
+            await sqs.send(
+              new DeleteMessageCommand({
+                QueueUrl: sqsUrl,
+                ReceiptHandle,
+              })
+            );
           }
         }
       }
