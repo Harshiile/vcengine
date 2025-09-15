@@ -22,19 +22,19 @@ export class AuthService {
     const hashedPassword = await hash(password, 5);
     const { refreshToken, accessToken } = this.getTokens(email, username);
 
-    prisma.user
-      .create({
-        data: {
-          name,
-          username,
-          email,
-          passwordHash: hashedPassword,
-          refreshToken,
-        },
-      })
-      .catch((err) => {
-        throw new Error(err.message);
-      });
+    // prisma.user
+    //   .create({
+    //     data: {
+    //       name,
+    //       username,
+    //       email,
+    //       passwordHash: hashedPassword,
+    //       refreshToken,
+    //     },
+    //   })
+    //   .catch((err) => {
+    //     throw new Error(err.message);
+    //   });
 
     return { accessToken };
   }

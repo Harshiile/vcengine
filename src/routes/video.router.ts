@@ -6,16 +6,21 @@ import {
   getMaxResolutionSchema,
   getPlaylistSchema,
   getSegmentSchema,
+  videoUploadSchema,
 } from "../@types/req/video.req";
 
 export const videoRouter = Router();
 
 const videoController = new VideoController(new VideoService());
 
-videoRouter.post("/upload", videoController.uploadVideo);
+videoRouter.post(
+  "/upload",
+  // requestValidator(videoUploadSchema),
+  videoController.uploadVideo
+);
 videoRouter.get(
   "/playlist/:workspace/:version/:resolution",
-  // requestValidator(getPlaylistSchema),
+  requestValidator(getPlaylistSchema),
   videoController.getPlaylist
 );
 videoRouter.get(
