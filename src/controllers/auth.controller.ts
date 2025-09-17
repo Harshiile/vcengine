@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
-import { prisma } from "../db";
 
 export class AuthController extends BaseController {
   constructor(private authService: AuthService) {

@@ -1,33 +1,33 @@
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { VideoService } from "../services/video.service";
-import busboy from "busboy";
+import fs from "fs";
+import path from "path";
 import { BUCKETS } from "../config/buckets";
+import z from "zod";
+import { generateSignedURLSchema } from "../@types/req/video.req";
+
+type signedUrlBody = z.infer<typeof generateSignedURLSchema.shape.body>;
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
     super();
   }
 
-  uploadVideo = (req: Request, res: Response, next: NextFunction) => {
+  generateSignedURL = (
+    req: Request<{}, {}, signedUrlBody>,
+    res: Response,
+    next: NextFunction
+  ) => {
     this.baseRequest(req, res, next, async () => {
-      const bb = busboy({ headers: req.headers });
-      const fileSize = req.headers["content-length"];
-      const socketId = req.headers["x-user-socket"] as string;
-
-      if (!socketId) throw new Error("Socket not initialized from Client Side");
-
-      req.pipe(bb);
-      return await this.videoService.uploadVideo(
-        bb,
-        Number(fileSize),
-        socketId
-      );
+      const { contentType, title, workspace } = req.body;
+      const fileName = `${title}.${workspace}`;
+      return await this.videoService.generateSignedURL(fileName, contentType);
     });
   };
 
-  getPlaylist = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, async () => {
+  getPlaylist = async (req: Request, res: Response, next: NextFunction) => {
+    try {
       const { resolution, version, workspace } = req.params;
       // const fileName = `${workspace}/${version}/playlist_${resolution}.m3u8`;
       const fileName = `${workspace}/playlist_${resolution}.m3u8`;
@@ -36,28 +36,34 @@ export class VideoController extends BaseController {
       const playlistStream = await this.videoService.getPlaylist(fileName);
 
       res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
-      res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
+      // res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
       playlistStream.pipe(res);
-    });
+    } catch (error) {
+      throw error;
+    }
   };
 
-  getSegment = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, async () => {
+  getSegment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
       const { segmentHash } = req.params;
 
       const segmentStream = await this.videoService.getSegment(segmentHash);
 
       res.setHeader("Content-Type", "video/MP2T");
-      res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
+      // res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
       segmentStream.pipe(res);
-    });
+    } catch (error) {
+      throw error;
+    }
   };
 
   getmaxResolution = (req: Request, res: Response, next: NextFunction) => {
     this.baseRequest(req, res, next, async () => {
       const { workspace } = req.params;
+      console.log(workspace);
+
       const maxResolution = await this.videoService.getmaxResolution(workspace);
-      return maxResolution;
+      return { maxResolution };
     });
   };
 

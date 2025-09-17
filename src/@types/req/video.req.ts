@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { notProvidedError } from "./utils/not-provided";
 
-export const videoUploadSchema = z.object({
+export const generateSignedURLSchema = z.object({
   body: z.object({
-    // workspace: z.string(),
-    // title: z.string(),
-    // video: z.file(notProvidedError("Video")),
+    contentType: z.string(),
+    title: z.string(),
+    workspace: z.string(),
   }),
 });
 

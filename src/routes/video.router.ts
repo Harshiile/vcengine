@@ -3,10 +3,10 @@ import { VideoController } from "../controllers/video.controller";
 import { VideoService } from "../services/video.service";
 import { requestValidator } from "../middleware/requestValidator";
 import {
+  generateSignedURLSchema,
   getMaxResolutionSchema,
   getPlaylistSchema,
   getSegmentSchema,
-  videoUploadSchema,
 } from "../@types/req/video.req";
 
 export const videoRouter = Router();
@@ -14,9 +14,9 @@ export const videoRouter = Router();
 const videoController = new VideoController(new VideoService());
 
 videoRouter.post(
-  "/upload",
-  // requestValidator(videoUploadSchema),
-  videoController.uploadVideo
+  "/get-signed-url",
+  requestValidator(generateSignedURLSchema),
+  videoController.generateSignedURL
 );
 videoRouter.get(
   "/playlist/:workspace/:version/:resolution",

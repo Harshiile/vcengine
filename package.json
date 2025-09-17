@@ -16,12 +16,12 @@
     "test": "npx jest"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.887.0",
+    "@aws-sdk/client-s3": "^3.890.0",
     "@aws-sdk/lib-storage": "^3.887.0",
+    "@aws-sdk/s3-request-presigner": "^3.890.0",
     "@prisma/client": "^6.15.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.58.2",
-    "busboy": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
@@ -36,7 +36,6 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
-    "@types/busboy": "^1.5.4",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/fluent-ffmpeg": "^2.1.27",

@@ -1,6 +1,6 @@
 import { hash, compare } from "bcrypt";
-import { prisma } from "../db";
 import { JwtGenerate } from "../utils/jwt";
+import { getPrismaInstance } from "../db";
 
 export class AuthService {
   private getTokens(email: string, username: string) {
@@ -16,33 +16,35 @@ export class AuthService {
     username: string,
     name: string
   ) {
+    const prisma = getPrismaInstance();
     const user = await prisma.user.findFirst({ where: { email } });
     if (user) throw new Error("User already exists");
 
     const hashedPassword = await hash(password, 5);
     const { refreshToken, accessToken } = this.getTokens(email, username);
 
-    // prisma.user
-    //   .create({
-    //     data: {
-    //       name,
-    //       username,
-    //       email,
-    //       passwordHash: hashedPassword,
-    //       refreshToken,
-    //     },
-    //   })
-    //   .catch((err) => {
-    //     throw new Error(err.message);
-    //   });
+    prisma.user
+      .create({
+        data: {
+          name,
+          username,
+          email,
+          passwordHash: hashedPassword,
+          refreshToken,
+        },
+      })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
 
     return { accessToken };
   }
 
   async login(email: string, password: string) {
+    const prisma = getPrismaInstance();
     const user = await prisma.user
       .findFirst({ where: { email } })
-      .catch((err) => {
+      .catch((err: any) => {
         throw new Error(err.message);
       });
 
@@ -64,7 +66,7 @@ export class AuthService {
           refreshToken,
         },
       })
-      .catch((err) => {
+      .catch((err: any) => {
         throw new Error(err.message);
       });
 

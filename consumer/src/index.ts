@@ -55,33 +55,33 @@ const init = async () => {
             // Spin the docker image in ECR via ECS fragmate
             // ....
             // Do volume mapping with folder /output which contain playlist.m3u8 files for multiple resolution
-            // new Promise(async (resolve, reject) => {
-            //   const docker = new Docker();
-            //   const container = await docker.createContainer({
-            //     Image: "transcoder-segmentor",
-            //     name: `transcoder_instance_${Date.now()}`,
-            //     HostConfig: {
-            //       Binds: [`${path.resolve(".")}:/app/output`],
-            //     },
-            //     Env: [
-            //       `WORKSPACE=xyz`,
-            //       `VIDEO_NAME=${videoName}`,
-            //       `ACCESS_KEY=${accessKeyId}`,
-            //       `SECRET_KEY=${secretAccessKey}`,
-            //     ],
-            //   });
-            //   const logs = await container.attach({
-            //     stream: true,
-            //     stdout: true,
-            //     stderr: true,
-            //   });
+            new Promise(async (resolve, reject) => {
+              const docker = new Docker();
+              const container = await docker.createContainer({
+                Image: "transcoder-segmentor",
+                name: `transcoder_instance_${Date.now()}`,
+                HostConfig: {
+                  Binds: [`${path.resolve(".")}:/app/output`],
+                },
+                Env: [
+                  `WORKSPACE=xyz`,
+                  `VIDEO_NAME=${videoName}`,
+                  `ACCESS_KEY=${accessKeyId}`,
+                  `SECRET_KEY=${secretAccessKey}`,
+                ],
+              });
+              const logs = await container.attach({
+                stream: true,
+                stdout: true,
+                stderr: true,
+              });
 
-            //   logs.on("data", (data) => console.log(data.toString()));
-            //   await container.start().catch(reject);
+              logs.on("data", (data) => console.log(data.toString()));
+              await container.start().catch(reject);
 
-            //   const result = await container.wait();
-            //   resolve(result);
-            // });
+              const result = await container.wait();
+              resolve(result);
+            });
 
             // Message Delete
             await sqs.send(
