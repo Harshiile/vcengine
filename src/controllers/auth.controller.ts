@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
+import { ENV } from "../config/env";
 
 export class AuthController extends BaseController {
   constructor(private authService: AuthService) {
@@ -16,7 +17,7 @@ export class AuthController extends BaseController {
         username,
         name
       );
-      res.cookie("auth-acs", accessToken);
+      res.cookie("auth-acs", accessToken, { maxAge: ENV.ACCESS_TOKEN_EXPIRY });
     });
   };
 
@@ -27,7 +28,7 @@ export class AuthController extends BaseController {
         email,
         password
       );
-      res.cookie("auth-acs", accessToken);
+      res.cookie("auth-acs", accessToken, { maxAge: ENV.ACCESS_TOKEN_EXPIRY });
     });
   };
 

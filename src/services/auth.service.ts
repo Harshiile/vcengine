@@ -23,8 +23,8 @@ export class AuthService {
     const hashedPassword = await hash(password, 5);
     const { refreshToken, accessToken } = this.getTokens(email, username);
 
-    prisma.user
-      .create({
+    await prisma.user
+      .createA({
         data: {
           name,
           username,
@@ -34,7 +34,7 @@ export class AuthService {
         },
       })
       .catch((err: any) => {
-        throw new Error(err.message);
+        throw err;
       });
 
     return { accessToken };
@@ -59,7 +59,7 @@ export class AuthService {
       user.username
     );
 
-    prisma.user
+    await prisma.user
       .update({
         where: { id: user.id },
         data: {
@@ -67,7 +67,7 @@ export class AuthService {
         },
       })
       .catch((err: any) => {
-        throw new Error(err.message);
+        throw err;
       });
 
     return { accessToken, user };

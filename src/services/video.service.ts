@@ -10,6 +10,7 @@ import { Stream } from "stream";
 import { BUCKETS } from "../config/buckets";
 import { sendProgress } from "../socket";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { signedUrlParams } from "../controllers/video.controller";
 
 // POST   /video/upload-on/{provider}/{id}   —   Upload on third-party streaming platform
 
@@ -24,9 +25,13 @@ export class VideoService {
     return Body;
   }
 
-  async generateSignedURL(fileName: string, ContentType: string) {
+  async generateSignedURL(
+    fileName: string,
+    ContentType: string,
+    { type }: signedUrlParams
+  ) {
     const command = new PutObjectCommand({
-      Bucket: BUCKETS.VC_RAW_VIDEOS,
+      Bucket: type == "banner" ? BUCKETS.VC_BANNER : BUCKETS.VC_RAW_VIDEOS,
       Key: fileName,
       ContentType,
     });

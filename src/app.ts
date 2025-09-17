@@ -2,9 +2,19 @@ import express from "express";
 import { videoRouter, authRouter, router } from "./routes";
 import { errorHandler } from "./middleware/errorHandler";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
+declare global {
+  namespace Express {
+    export interface Request {
+      user: string;
+    }
+  }
+}
 
 export const app = express();
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

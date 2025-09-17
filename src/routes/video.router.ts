@@ -14,7 +14,7 @@ export const videoRouter = Router();
 const videoController = new VideoController(new VideoService());
 
 videoRouter.post(
-  "/get-signed-url",
+  "/get-signed-url/:type",
   requestValidator(generateSignedURLSchema),
   videoController.generateSignedURL
 );

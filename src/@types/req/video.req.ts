@@ -6,6 +6,10 @@ export const generateSignedURLSchema = z.object({
     contentType: z.string(),
     title: z.string(),
     workspace: z.string(),
+    fileOriginalName: z.string(),
+  }),
+  params: z.object({
+    type: z.enum(["video", "banner"]),
   }),
 });
 

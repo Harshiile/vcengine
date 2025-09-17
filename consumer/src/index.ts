@@ -1,6 +1,7 @@
 import {
   ReceiveMessageCommand,
   DeleteMessageCommand,
+  SendMessageCommand,
   SQSClient,
 } from "@aws-sdk/client-sqs";
 import dotenv from "dotenv";
@@ -42,15 +43,23 @@ const init = async () => {
 
           const records = JSON.parse(Body).Records;
           if (records) {
-            console.log(records);
-
             const {
               s3: { object, bucket },
             } = JSON.parse(Body).Records[0];
             console.log({ object, bucket });
 
             const videoName = object.key;
-            const bucketName = bucket.name;
+
+            // Just delete message now - Store state if message our push state again
+            const oldMessageState = {
+              videoName,
+            };
+            await sqs.send(
+              new DeleteMessageCommand({
+                QueueUrl: sqsUrl,
+                ReceiptHandle,
+              })
+            );
 
             // Spin the docker image in ECR via ECS fragmate
             // ....
@@ -64,7 +73,6 @@ const init = async () => {
                   Binds: [`${path.resolve(".")}:/app/output`],
                 },
                 Env: [
-                  `WORKSPACE=xyz`,
                   `VIDEO_NAME=${videoName}`,
                   `ACCESS_KEY=${accessKeyId}`,
                   `SECRET_KEY=${secretAccessKey}`,
@@ -81,15 +89,9 @@ const init = async () => {
 
               const result = await container.wait();
               resolve(result);
+            }).catch(async (err) => {
+              // Resend message Delete
             });
-
-            // Message Delete
-            await sqs.send(
-              new DeleteMessageCommand({
-                QueueUrl: sqsUrl,
-                ReceiptHandle,
-              })
-            );
           }
         }
       }
