@@ -8,7 +8,6 @@ import {
 import { Upload } from "@aws-sdk/lib-storage";
 import { Stream } from "stream";
 import { BUCKETS } from "../config/buckets";
-import { sendProgress } from "../socket";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { signedUrlParams } from "../controllers/video.controller";
 

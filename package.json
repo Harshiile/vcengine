@@ -19,7 +19,7 @@
     "@aws-sdk/client-s3": "^3.890.0",
     "@aws-sdk/lib-storage": "^3.887.0",
     "@aws-sdk/s3-request-presigner": "^3.890.0",
-    "@prisma/client": "^6.15.0",
+    "@prisma/client": "^6.16.2",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.58.2",
     "cookie-parser": "^1.4.7",
@@ -31,7 +31,7 @@
     "googleapis-common": "^8.0.0",
     "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.15.0",
+    "prisma": "^6.16.2",
     "socket.io": "^4.8.1",
     "zod": "^4.0.17"
   },

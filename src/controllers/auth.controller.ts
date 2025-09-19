@@ -2,22 +2,36 @@ import { NextFunction, Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
+import z from "zod";
+import { signupSchema } from "../@types/req";
+
+type signupBody = z.infer<typeof signupSchema.shape.body>;
 
 export class AuthController extends BaseController {
   constructor(private authService: AuthService) {
     super();
   }
 
-  signup = (req: Request, res: Response, next: NextFunction): void => {
+  signup = (
+    req: Request<{}, {}, signupBody>,
+    res: Response,
+    next: NextFunction
+  ): void => {
     this.baseRequest(req, res, next, async () => {
-      const { email, password, username, name } = req.body;
-      const { accessToken } = await this.authService.signup(
+      const { email, password, username, name, avatar } = req.body;
+      const { accessToken, uploadAvatarUrl } = await this.authService.signup(
         email,
         password,
         username,
-        name
+        name,
+        avatar
       );
-      res.cookie("auth-acs", accessToken, { maxAge: ENV.ACCESS_TOKEN_EXPIRY });
+
+      res.cookie(ENV.ACCESS_TOKEN_NAME, accessToken, {
+        maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
+      });
+
+      return { uploadAvatarUrl };
     });
   };
 
@@ -28,13 +42,15 @@ export class AuthController extends BaseController {
         email,
         password
       );
-      res.cookie("auth-acs", accessToken, { maxAge: ENV.ACCESS_TOKEN_EXPIRY });
+      res.cookie(ENV.ACCESS_TOKEN_NAME, accessToken, {
+        maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
+      });
     });
   };
 
   logout = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      res.clearCookie("auth-acs");
+      res.clearCookie(ENV.ACCESS_TOKEN_NAME);
     });
   };
 

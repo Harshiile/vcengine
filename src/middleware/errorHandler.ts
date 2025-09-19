@@ -1,17 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-import { ZodError } from "zod";
+import { VCError } from "../utils/error";
 
 export const errorHandler = (
-  err: Error | ZodError,
+  err: VCError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  let message;
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Unvalid Error";
 
-  if (err instanceof Error) message = err.message;
-  else message = "Zod Error";
-  return res.status(500).json({
+  return res.status(statusCode).json({
     success: false,
     message,
   });

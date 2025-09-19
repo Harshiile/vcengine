@@ -3,6 +3,7 @@ import { AuthController } from "../controllers/auth.controller";
 import { AuthService } from "../services/auth.service";
 import { requestValidator } from "../middleware/requestValidator";
 import { loginSchema, signupSchema } from "../@types/req";
+import { authValidator } from "../middleware/authValidator";
 
 export const authRouter = Router();
 
@@ -16,7 +17,7 @@ authRouter.post(
 
 authRouter.post("/login", requestValidator(loginSchema), authController.login);
 
-authRouter.post("/logout", authController.logout);
+authRouter.post("/logout", authValidator, authController.logout);
 
 authRouter.get("/user/:id", authController.getUser);
 authRouter.put("/user/:id", authController.updateUser);

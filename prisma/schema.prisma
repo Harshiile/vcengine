@@ -15,15 +15,14 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  username      String   @unique
-  email         String   @unique
-  passwordHash  String
-  refreshToken  String   @unique
-  avatarUrl     String?
-  createdAt     DateTime @default(now())
-  lastUpdatedAt DateTime
+  id           String   @id @default(uuid())
+  name         String
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  refreshToken String   @unique
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
 
   Workspace Workspace[]
   Branch    Branch[]
