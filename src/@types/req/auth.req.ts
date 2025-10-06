@@ -14,11 +14,20 @@ export const signupSchema = z.object({
     username: z.string(notProvidedError("Username")),
     name: z.string(notProvidedError("Name")),
     avatar: z
-      .object({
-        avatarExt: z.string(),
-        avatarContentType: z.string(),
-      })
+      .string()
       .optional(),
     password: z.string().min(8, { error: "Password is too short" }),
+  }),
+});
+
+export const uploadAvatarSchema = z.object({
+  body: z.object({
+    contentType: z.string(notProvidedError("Content Type")),
+  }),
+});
+
+export const getAvatarSchema = z.object({
+  params: z.object({
+    userId: z.string(notProvidedError("User Id")),
   }),
 });

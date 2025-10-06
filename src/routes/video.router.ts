@@ -3,20 +3,27 @@ import { VideoController } from "../controllers/video.controller";
 import { VideoService } from "../services/video.service";
 import { requestValidator } from "../middleware/requestValidator";
 import {
-  generateSignedURLSchema,
+  uploadVideoSchema,
   getMaxResolutionSchema,
   getPlaylistSchema,
   getSegmentSchema,
+  getSignedUrlSchema,
 } from "../@types/req/video.req";
 
 export const videoRouter = Router();
 
 const videoController = new VideoController(new VideoService());
 
+// For avatar & banner
 videoRouter.post(
-  "/get-signed-url/:type",
-  requestValidator(generateSignedURLSchema),
-  videoController.generateSignedURL
+  "/upload",
+  requestValidator(uploadVideoSchema),
+  videoController.uploadVideo
+);
+videoRouter.post(
+  "/get-signed-url",
+  requestValidator(getSignedUrlSchema),
+  videoController.uploadVideo
 );
 videoRouter.get(
   "/playlist/:workspace/:version/:resolution",

@@ -3,14 +3,13 @@ import { JwtGenerate } from "../utils/jwt";
 import { getPrismaInstance } from "../db";
 import { VCError } from "../utils/error";
 import { v4 } from "uuid";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { Stream } from "stream";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { BUCKETS } from "../config/buckets";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../config/s3";
 import z from "zod";
 import { signupSchema } from "../@types/req";
-
-type avatarType = z.infer<typeof signupSchema.shape.body.shape.avatar>;
 
 export class AuthService {
   private getTokens(email: string, userId: string) {
@@ -25,7 +24,7 @@ export class AuthService {
     password: string,
     username: string,
     name: string,
-    avatar: avatarType
+    avatar: string | undefined
   ) {
     const prisma = getPrismaInstance();
     const user = await prisma.user.findFirst({ where: { email } });
@@ -42,6 +41,7 @@ export class AuthService {
           name,
           username,
           email,
+          avatarUrl: avatar,
           passwordHash: hashedPassword,
           refreshToken,
         },
@@ -50,21 +50,8 @@ export class AuthService {
         throw err;
       });
 
-    let uploadAvatarUrl: string | null = null;
-    if (avatar) {
-      // Sending signedUrl for avatar
-      const command = new PutObjectCommand({
-        Bucket: BUCKETS.VC_AVATAR,
-        Key: `${userId}.${avatar.avatarExt}`,
-        ContentType: avatar.avatarContentType,
-      });
 
-      uploadAvatarUrl = await getSignedUrl(s3, command, {
-        expiresIn: 60,
-      });
-    }
-
-    return { accessToken, uploadAvatarUrl };
+    return { accessToken };
   }
 
   async login(email: string, password: string) {
@@ -98,7 +85,59 @@ export class AuthService {
     return { accessToken, user };
   }
 
-  async getUser() {}
+
+  async uploadAvatar(contentType: string) {
+    const tmpAvatarId = v4()
+    const avatarKey = `${v4()}.${contentType.split("/")[1]}`
+    const command = new PutObjectCommand({
+      Bucket: BUCKETS.VC_AVATAR,
+      Key: avatarKey,
+      ContentType: contentType,
+    });
+
+    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
+    return { uploadUrl, avatarKey };
+  }
+
+  async getAvatar(userId: string) {
+    const prisma = getPrismaInstance();
+    const user = await prisma.user
+      .findFirst({ where: { id: userId } })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
+
+
+    if (!user) throw new VCError(404, "User not exists");
+    if (!user.avatarUrl) return null;
+
+    const { Body } = await s3.send(
+      new GetObjectCommand({
+        Bucket: BUCKETS.VC_AVATAR,
+        Key: user.avatarUrl,
+      })
+    );
+    return Body as Stream;
+
+  }
+
+  async getUser(userId: string) {
+    const prisma = getPrismaInstance();
+    const user = await prisma.user
+      .findFirst({ where: { id: userId } })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
+
+    if (!user) return null;
+
+    const { id, name, username } = user
+    return {
+      id,
+      name,
+      username,
+    }
+  }
 
   async updateUser() {
     // which thing can update

@@ -26,6 +26,7 @@ model User {
 
   Workspace Workspace[]
   Branch    Branch[]
+  Issues    Issues[]
 }
 
 enum WorkspaceType {
@@ -39,24 +40,28 @@ model Workspace {
   name         String
   type         WorkspaceType
   banner       String?
-  activeBranch String
+  activeBranch String?
   createdAt    DateTime      @default(now())
 
-  User User @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  // ActiveBranch Branch @relation(fields: [activeBranch], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
+  User   User     @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Videos Videos[]
   Branch Branch[]
+  Issues Issues[]
+}
+
+enum VideoState {
+  Processing
+  Uploaded
 }
 
 model Videos {
-  id           String   @id @default(uuid())
-  title        String   @default("Untitled Video")
+  id           String     @id @default(uuid())
   workspace    String
   width        Int
   height       Int
+  state        VideoState
   playlistFile String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
 
   Workspace     Workspace       @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
   VideoVersions VideoVersions[]
@@ -71,14 +76,14 @@ model Segment {
 model Branch {
   id          String   @id @default(uuid())
   name        String
-  workspace   String
   createdBy   String
-  headVersion String
+  workspace   String
+  headVersion String?
   createdAt   DateTime @default(now())
 
-  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  User      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Version   Versions  @relation(fields: [headVersion], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Version   Versions?  @relation(fields: [headVersion], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace? @relation(fields: [workspace], references: [id])
 }
 
 model Versions {
@@ -90,8 +95,6 @@ model Versions {
 
   parent   Versions?  @relation("versionToChildern", fields: [parentVersion], references: [id])
   children Versions[] @relation("versionToChildern")
-  // Version  Versions   @relation(references: [id], fields: [parentVersion])
-  // Branch   Branch     @relation(references: [id], fields: [branch])
 
   VideoVersions VideoVersions[]
   Branch        Branch[]
@@ -114,98 +117,20 @@ model VideoVersions {
   Versions Versions @relation(references: [id], fields: [version])
 }
 
-// enum PRType {
-//   Open
-//   Merged
-//   Closed
-// }
+enum IssuesState {
+  Open
+  Closed
+}
 
-// model PullRequests {
-//   id        String   @id @default(uuid())
-//   workspace String
-//   createdBy String
-//   createdAt DateTime @default(now())
-//   state     PRType
+model Issues {
+  id          String      @id @default(uuid())
+  issueNumber Int
+  createdBy   String
+  workspace   String
+  message     String
+  state       IssuesState
+  createdAt   DateTime    @default(now())
 
-//   User      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   Workspace Workspace  @relation(fields: [workspace], references: [id], onUpdate: Cascade)
-//   Comments  Comments[]
-// }
-
-// enum IssuesState {
-//   Open
-//   Closed
-// }
-
-// model Issues {
-//   id          String      @id @default(uuid())
-//   issueNumber Int
-//   createdBy   String
-//   workspace   String
-//   message     String
-//   state       IssuesState
-//   createdAt   DateTime    @default(now())
-
-//   User      User      @relation(fields: [createdBy], references: [id])
-//   Workspace Workspace @relation(fields: [workspace], references: [id])
-
-//   Comments Comments[]
-// }
-
-// model Forks {
-//   id              String   @id @default(uuid())
-//   sourceWorkspace String
-//   destWorkspace   String
-//   forkedBy        String
-//   onVersion       String
-//   createdAt       DateTime @default(now())
-
-//   User           User      @relation(fields: [forkedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   Version        Versions  @relation(fields: [onVersion], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   Workspace_Src  Workspace @relation(fields: [destWorkspace], references: [id], onUpdate: Cascade)
-//   Workspace_Dest Workspace @relation(fields: [sourceWorkspace], references: [id], onUpdate: Cascade)
-// }
-
-// enum PermissionType {
-//   Viewer
-//   Editor
-//   Owner
-// }
-
-// model Permissions {
-//   id        String         @id @default(uuid())
-//   workspace String
-//   role      PermissionType
-//   userId    String
-//   grantedBy String
-//   createdAt DateTime       @default(now())
-
-//   // User_To    User      @relation("UserFK", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // User_Grant User      @relation("grantUserFK", fields: [grantedBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   User      User      @relation(fields: [userId], references: [id])
-// }
-
-// enum TargetType {
-//   Issue
-//   PR
-// }
-
-// model Comments {
-//   id         String     @id @default(uuid())
-//   message    String
-//   createdBy  String
-//   targetType TargetType
-//   targetId   String
-//   createdAt  DateTime   @default(now())
-
-//   User           User          @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // PullRequests PullRequests? @relation(fields: [targetId], references: [id])
-//   // pullRequestsId String?
-//   // Issues       Issues?       @relation(fields: [targetId], references: [id])
-//   // issuesId       String?
-//   PullRequests   PullRequests? @relation(fields: [pullRequestsId], references: [id])
-//   pullRequestsId String?
-//   Issues         Issues?       @relation(fields: [issuesId], references: [id])
-//   issuesId       String?
-// }
+  User      User      @relation(fields: [createdBy], references: [id])
+  Workspace Workspace @relation(fields: [workspace], references: [id])
+}

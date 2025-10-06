@@ -11,11 +11,13 @@ dotenv.config();
 
 const sqsUrl =
   "https://sqs.ap-south-1.amazonaws.com/280428163167/s3-to-consumer-connecter";
+
 const init = async () => {
   const accessKeyId = process.env.ACCESS_KEY;
   const secretAccessKey = process.env.SECRET_KEY;
+  const dbUrl = process.env.DB_URL;
 
-  if (!accessKeyId || !secretAccessKey)
+  if (!accessKeyId || !secretAccessKey || !dbUrl)
     throw new Error("Credentails is not valid");
 
   const sqs = new SQSClient({
@@ -54,16 +56,16 @@ const init = async () => {
             const oldMessageState = {
               videoName,
             };
-            await sqs.send(
-              new DeleteMessageCommand({
-                QueueUrl: sqsUrl,
-                ReceiptHandle,
-              })
-            );
+
+
+            // await sqs.send(
+            //   new DeleteMessageCommand({
+            //     QueueUrl: sqsUrl,
+            //     ReceiptHandle,
+            //   })
+            // );
 
             // Spin the docker image in ECR via ECS fragmate
-            // ....
-            // Do volume mapping with folder /output which contain playlist.m3u8 files for multiple resolution
             new Promise(async (resolve, reject) => {
               const docker = new Docker();
               const container = await docker.createContainer({
@@ -76,6 +78,7 @@ const init = async () => {
                   `VIDEO_NAME=${videoName}`,
                   `ACCESS_KEY=${accessKeyId}`,
                   `SECRET_KEY=${secretAccessKey}`,
+                  `DB_URL=${dbUrl}`,
                 ],
               });
               const logs = await container.attach({

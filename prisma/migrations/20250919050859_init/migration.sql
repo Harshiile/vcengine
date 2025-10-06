@@ -1,43 +1,38 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "public"."WorkspaceType" AS ENUM ('Public', 'Private');
 
-  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to drop the column `avatar` on the `User` table. All the data in the column will be lost.
-  - You are about to drop the column `password` on the `User` table. All the data in the column will be lost.
-  - The primary key for the `Workspace` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - A unique constraint covering the columns `[username]` on the table `User` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[email]` on the table `User` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[refreshToken]` on the table `User` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `passwordHash` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `activeBranch` to the `Workspace` table without a default value. This is not possible if the table is not empty.
+-- CreateEnum
+CREATE TYPE "public"."VideoState" AS ENUM ('Processing', 'Uploaded');
 
-*/
 -- CreateEnum
 CREATE TYPE "public"."changeType" AS ENUM ('Add', 'Modified', 'Revert', 'Remove');
 
--- DropForeignKey
-ALTER TABLE "public"."Workspace" DROP CONSTRAINT "Workspace_createdBy_fkey";
+-- CreateTable
+CREATE TABLE "public"."User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
+    "refreshToken" TEXT NOT NULL,
+    "avatarUrl" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- AlterTable
-ALTER TABLE "public"."User" DROP CONSTRAINT "User_pkey",
-DROP COLUMN "avatar",
-DROP COLUMN "password",
-ADD COLUMN     "avatarUrl" TEXT,
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "passwordHash" TEXT NOT NULL,
-ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "id" SET DATA TYPE TEXT,
-ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
-DROP SEQUENCE "User_id_seq";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
--- AlterTable
-ALTER TABLE "public"."Workspace" DROP CONSTRAINT "Workspace_pkey",
-ADD COLUMN     "activeBranch" TEXT NOT NULL,
-ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "id" SET DATA TYPE TEXT,
-ALTER COLUMN "createdBy" SET DATA TYPE TEXT,
-ADD CONSTRAINT "Workspace_pkey" PRIMARY KEY ("id");
-DROP SEQUENCE "Workspace_id_seq";
+-- CreateTable
+CREATE TABLE "public"."Workspace" (
+    "id" TEXT NOT NULL,
+    "createdBy" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" "public"."WorkspaceType" NOT NULL,
+    "banner" TEXT,
+    "activeBranch" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Workspace_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "public"."Videos" (
@@ -46,6 +41,7 @@ CREATE TABLE "public"."Videos" (
     "workspace" TEXT NOT NULL,
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
+    "state" "public"."VideoState" NOT NULL,
     "playlistFile" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -95,9 +91,6 @@ CREATE TABLE "public"."VideoVersions" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Segment_hash_key" ON "public"."Segment"("hash");
-
--- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "public"."User"("username");
 
 -- CreateIndex
@@ -105,6 +98,9 @@ CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_refreshToken_key" ON "public"."User"("refreshToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Segment_hash_key" ON "public"."Segment"("hash");
 
 -- AddForeignKey
 ALTER TABLE "public"."Workspace" ADD CONSTRAINT "Workspace_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

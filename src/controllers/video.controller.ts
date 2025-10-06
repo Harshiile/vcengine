@@ -5,33 +5,44 @@ import fs from "fs";
 import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
-import { generateSignedURLSchema } from "../@types/req/video.req";
+import { getSignedUrlSchema, uploadVideoSchema } from "../@types/req/video.req";
 
-type signedUrlBody = z.infer<typeof generateSignedURLSchema.shape.body>;
-export type signedUrlParams = z.infer<
-  typeof generateSignedURLSchema.shape.params
->;
+type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
+export type getSignedUrlBody = z.infer<typeof getSignedUrlSchema.shape.body>;
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
     super();
   }
 
-  generateSignedURL = (
-    req: Request<signedUrlParams, {}, signedUrlBody>,
+  uploadVideo = (
+    req: Request<{}, {}, uploadVideoBody>,
     res: Response,
     next: NextFunction
   ) => {
     this.baseRequest(req, res, next, async () => {
-      const { contentType, title, workspace, fileOriginalName } = req.body;
-      const { type } = req.params;
-      const extAr = fileOriginalName.split(".");
-      const ext = extAr[extAr.length - 1];
+      const { contentType, commitMessage, workspace, branch } = req.body;
 
-      const fileName = `${title}.${workspace}.${ext}`;
-      return await this.videoService.generateSignedURL(fileName, contentType, {
-        type,
-      });
+      const user='21841b57-87b4-410d-8c48-aa4d95582772' // should be req.user
+      return await this.videoService.uploadVideo(
+        contentType,
+        branch,
+        workspace,
+        commitMessage,
+        user
+      );
+    });
+  };
+
+  getSignedUrl = async (
+    req: Request<{}, {}, getSignedUrlBody>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    this.baseRequest(req, res, next, async () => {
+      const { user, body } = req;
+      const { uploadUrl } = await this.videoService.signedUrl(user, body);
+      return uploadUrl;
     });
   };
 

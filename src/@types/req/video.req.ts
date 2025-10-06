@@ -1,15 +1,20 @@
 import { z } from "zod";
 import { notProvidedError } from "./utils/not-provided";
 
-export const generateSignedURLSchema = z.object({
+export const uploadVideoSchema = z.object({
   body: z.object({
     contentType: z.string(),
-    title: z.string(),
+    commitMessage: z.string(),
     workspace: z.string(),
-    fileOriginalName: z.string(),
+    branch: z.string(),
   }),
-  params: z.object({
-    type: z.enum(["video", "banner"]),
+});
+
+export const getSignedUrlSchema = z.object({
+  body: z.object({
+    type: z.enum(["avatar", "banner"]),
+    contentType: z.string(),
+    workspace: z.string().optional(),
   }),
 });
 

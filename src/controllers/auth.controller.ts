@@ -4,8 +4,11 @@ import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
 import z from "zod";
 import { signupSchema } from "../@types/req";
+import { getAvatarSchema, uploadAvatarSchema } from "../@types/req/auth.req";
 
 type signupBody = z.infer<typeof signupSchema.shape.body>;
+type uploadAvatarBody = z.infer<typeof uploadAvatarSchema.shape.body>;
+type getAvatarBody = z.infer<typeof getAvatarSchema.shape.params>;
 
 export class AuthController extends BaseController {
   constructor(private authService: AuthService) {
@@ -19,7 +22,8 @@ export class AuthController extends BaseController {
   ): void => {
     this.baseRequest(req, res, next, async () => {
       const { email, password, username, name, avatar } = req.body;
-      const { accessToken, uploadAvatarUrl } = await this.authService.signup(
+
+      const { accessToken } = await this.authService.signup(
         email,
         password,
         username,
@@ -31,7 +35,6 @@ export class AuthController extends BaseController {
         maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
       });
 
-      return { uploadAvatarUrl };
     });
   };
 
@@ -54,9 +57,33 @@ export class AuthController extends BaseController {
     });
   };
 
+
+  uploadAvatar = (req: Request<{}, {}, uploadAvatarBody>, res: Response, next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      const { uploadUrl, avatarKey } = await this.authService.uploadAvatar(req.body.contentType)
+      return { uploadUrl, avatarKey }
+    })
+  }
+
+  getAvatar = async (req: Request<getAvatarBody>, res: Response, next: NextFunction) => {
+    try {
+      const avatarStream = await this.authService.getAvatar(req.params.userId);
+
+      if (!avatarStream) return null;
+
+      res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
+      avatarStream.pipe(res);
+
+      const { uploadUrl, avatarKey } = await this.authService.uploadAvatar(req.body.contentType)
+      return { uploadUrl, avatarKey }
+    }
+    catch (err) { }
+  }
+
+
   getUser = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      return this.authService.getUser();
+      return this.authService.getUser(req.user);
     });
   };
 
