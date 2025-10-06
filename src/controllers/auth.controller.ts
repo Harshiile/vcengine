@@ -3,8 +3,8 @@ import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
 import z from "zod";
-import { signupSchema } from "../@types/req";
-import { getAvatarSchema, uploadAvatarSchema } from "../@types/req/auth.req";
+import { getAvatarSchema, signupSchema, uploadAvatarSchema } from "../@types/req/auth.req";
+import { VCError } from "../utils/error";
 
 type signupBody = z.infer<typeof signupSchema.shape.body>;
 type uploadAvatarBody = z.infer<typeof uploadAvatarSchema.shape.body>;
@@ -23,7 +23,7 @@ export class AuthController extends BaseController {
     this.baseRequest(req, res, next, async () => {
       const { email, password, username, name, avatar } = req.body;
 
-      const { accessToken } = await this.authService.signup(
+      const { accessToken, user } = await this.authService.signup(
         email,
         password,
         username,
@@ -34,6 +34,8 @@ export class AuthController extends BaseController {
       res.cookie(ENV.ACCESS_TOKEN_NAME, accessToken, {
         maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
       });
+
+      return { user }
 
     });
   };
@@ -48,6 +50,8 @@ export class AuthController extends BaseController {
       res.cookie(ENV.ACCESS_TOKEN_NAME, accessToken, {
         maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
       });
+
+      return { user }
     });
   };
 
@@ -73,11 +77,8 @@ export class AuthController extends BaseController {
 
       res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
       avatarStream.pipe(res);
-
-      const { uploadUrl, avatarKey } = await this.authService.uploadAvatar(req.body.contentType)
-      return { uploadUrl, avatarKey }
     }
-    catch (err) { }
+    catch (err) { throw new VCError(400, "Unvalid Error") }
   }
 
 

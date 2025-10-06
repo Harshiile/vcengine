@@ -9,7 +9,6 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { Stream } from "stream";
 import { BUCKETS } from "../config/buckets";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getSignedUrlBody } from "../controllers/video.controller";
 import { getPrismaInstance } from "../db";
 import { v4 } from "uuid";
 // POST   /video/upload-on/{provider}/{id}   —   Upload on third-party streaming platform
@@ -55,19 +54,6 @@ export class VideoService {
     return { uploadUrl, fileKey };
   }
 
-  async signedUrl(
-    user: string,
-    { type, workspace, contentType }: getSignedUrlBody
-  ) {
-    const command = new PutObjectCommand({
-      Bucket: type == "banner" ? BUCKETS.VC_BANNER : BUCKETS.VC_RAW_VIDEOS,
-      Key: type == "banner" ? user : `${user}/${workspace}`,
-      ContentType: contentType,
-    });
-
-    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
-    return { uploadUrl };
-  }
 
   async getPlaylist(fileKey: string) {
     return (await this.getStream(fileKey, BUCKETS.VC_PLAYLIST)) as Stream;

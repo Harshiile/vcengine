@@ -1,2 +1,18 @@
+import z from "zod";
 import { loginSchema, signupSchema } from "./auth.req";
-export { loginSchema, signupSchema };
+import { notProvidedError } from "./utils/not-provided";
+
+
+export const getSignedUrlSchema = z.object({
+    body: z.object({
+        type: z.enum(["banner", "avatar"]),
+        contentType: z.string(notProvidedError("Content Type")),
+    }),
+});
+
+export const getImageContentSchema = z.object({
+    params: z.object({
+        type: z.enum(["banner", "avatar"]),
+        fileId: z.string()
+    }),
+});

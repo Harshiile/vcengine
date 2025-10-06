@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { notProvidedError } from "./utils/not-provided";
 
 export const uploadVideoSchema = z.object({
   body: z.object({
@@ -7,14 +6,6 @@ export const uploadVideoSchema = z.object({
     commitMessage: z.string(),
     workspace: z.string(),
     branch: z.string(),
-  }),
-});
-
-export const getSignedUrlSchema = z.object({
-  body: z.object({
-    type: z.enum(["avatar", "banner"]),
-    contentType: z.string(),
-    workspace: z.string().optional(),
   }),
 });
 

@@ -6,3 +6,9 @@ export const workspaceCreateSchema = z.object({
     type: z.enum(["Public", "Private"]),
   }),
 });
+
+export const getWorkspaceSchema = z.object({
+  params: z.object({
+    userId: z.string(),
+  }),
+});

@@ -9,7 +9,6 @@ import { BUCKETS } from "../config/buckets";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../config/s3";
 import z from "zod";
-import { signupSchema } from "../@types/req";
 
 export class AuthService {
   private getTokens(email: string, userId: string) {
@@ -51,7 +50,13 @@ export class AuthService {
       });
 
 
-    return { accessToken };
+    return {
+      accessToken, user: {
+        id: userId,
+        username,
+        name
+      }
+    };
   }
 
   async login(email: string, password: string) {
@@ -82,7 +87,15 @@ export class AuthService {
         throw err;
       });
 
-    return { accessToken, user };
+
+
+    return {
+      accessToken, user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+      }
+    };
   }
 
 

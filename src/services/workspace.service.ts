@@ -2,6 +2,7 @@ import z from "zod";
 import { workspaceCreateSchema } from "../@types/req/workspace.req";
 import { getPrismaInstance } from "../db";
 import { v4 } from "uuid";
+import { VCError } from "../utils/error";
 
 type workspaceType = z.infer<
   typeof workspaceCreateSchema.shape.body.shape.type
@@ -12,6 +13,8 @@ export class WorkspaceService {
 
   createWorkspace = async (user: string, name: string, type: workspaceType) => {
     const branchId = v4();
+
+    // 1. Create Workspace
     const { id: workspaceId } = await this.prisma.workspace.create({
       data: {
         activeBranch: branchId,
@@ -21,6 +24,7 @@ export class WorkspaceService {
       },
     });
 
+    //  2. Create Branch
     await this.prisma.branch.create({
       data: {
         name: "main",
@@ -30,4 +34,25 @@ export class WorkspaceService {
       },
     });
   };
+
+  getWorkspaces = async (userId: string) => {
+    const prisma = getPrismaInstance()
+
+    const workspaces = await prisma
+      .workspace
+      .findMany({
+        where: { createdBy: userId },
+        select: {
+          id: true,
+          banner: true,
+          createdAt: true,
+          name: true,
+          type: true,
+          Branch: { select: { id: true, name: true } },
+        },
+      })
+      .catch(err => { throw new VCError(400, err.message) });
+
+    return { workspaces }
+  }
 }

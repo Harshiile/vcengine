@@ -5,10 +5,9 @@ import fs from "fs";
 import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
-import { getSignedUrlSchema, uploadVideoSchema } from "../@types/req/video.req";
+import { uploadVideoSchema } from "../@types/req/video.req";
 
 type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
-export type getSignedUrlBody = z.infer<typeof getSignedUrlSchema.shape.body>;
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
@@ -23,7 +22,7 @@ export class VideoController extends BaseController {
     this.baseRequest(req, res, next, async () => {
       const { contentType, commitMessage, workspace, branch } = req.body;
 
-      const user='21841b57-87b4-410d-8c48-aa4d95582772' // should be req.user
+      const user = '21841b57-87b4-410d-8c48-aa4d95582772' // should be req.user
       return await this.videoService.uploadVideo(
         contentType,
         branch,
@@ -34,17 +33,6 @@ export class VideoController extends BaseController {
     });
   };
 
-  getSignedUrl = async (
-    req: Request<{}, {}, getSignedUrlBody>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    this.baseRequest(req, res, next, async () => {
-      const { user, body } = req;
-      const { uploadUrl } = await this.videoService.signedUrl(user, body);
-      return uploadUrl;
-    });
-  };
 
   getPlaylist = async (req: Request, res: Response, next: NextFunction) => {
     try {

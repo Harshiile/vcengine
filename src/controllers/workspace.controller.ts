@@ -2,9 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import z from "zod";
-import { workspaceCreateSchema } from "../@types/req/workspace.req";
+import { getWorkspaceSchema, workspaceCreateSchema } from "../@types/req/workspace.req";
 
 type wsCreateBody = z.infer<typeof workspaceCreateSchema.shape.body>;
+type wsGetParams = z.infer<typeof getWorkspaceSchema.shape.params>;
 
 export class WorkspaceController extends BaseController {
   constructor(private workspaceService: WorkspaceService) {
@@ -17,9 +18,19 @@ export class WorkspaceController extends BaseController {
     next: NextFunction
   ): void => {
     this.baseRequest(req, res, next, async () => {
-      const { name, type } = req.body;
-      const { user } = req;
-      return this.workspaceService.createWorkspace(user, name, type);
+      const { name, type } = req.body
+      this.workspaceService.createWorkspace(req.user, name, type)
+    });
+  };
+
+  getWorkspaces = (
+    req: Request<wsGetParams>,
+    res: Response,
+    next: NextFunction
+  ): void => {
+    this.baseRequest(req, res, next, async () => {
+      const { workspaces } = await this.workspaceService.getWorkspaces(req.params.userId);
+      return { workspaces }
     });
   };
 }
