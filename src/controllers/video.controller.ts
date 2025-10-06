@@ -22,13 +22,12 @@ export class VideoController extends BaseController {
     this.baseRequest(req, res, next, async () => {
       const { contentType, commitMessage, workspace, branch } = req.body;
 
-      const user = '21841b57-87b4-410d-8c48-aa4d95582772' // should be req.user
       return await this.videoService.uploadVideo(
         contentType,
         branch,
         workspace,
         commitMessage,
-        user
+        req.user
       );
     });
   };

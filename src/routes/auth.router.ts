@@ -2,9 +2,8 @@ import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { AuthService } from "../services/auth.service";
 import { requestValidator } from "../middleware/requestValidator";
-import { loginSchema, signupSchema } from "../@types/req";
 import { authValidator } from "../middleware/authValidator";
-import { getAvatarSchema, uploadAvatarSchema } from "../@types/req/auth.req";
+import { getAvatarSchema, loginSchema, signupSchema, uploadAvatarSchema } from "../@types/req/auth.req";
 
 export const authRouter = Router();
 
@@ -25,5 +24,7 @@ authRouter.get("/avatar/:userId", requestValidator(getAvatarSchema), authControl
 authRouter.post("/logout", authValidator, authController.logout);
 
 authRouter.get("/user", authValidator, authController.getUser);
+
+authRouter.get("/unique-username/:oldUsername", authController.isUniqueUsername);
 
 authRouter.put("/user/:id", authController.updateUser);

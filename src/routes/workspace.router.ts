@@ -9,6 +9,7 @@ export const wsRouter = Router();
 
 const wsontroller = new WorkspaceController(new WorkspaceService());
 
+// Create Workspace
 wsRouter.post(
   "/",
   authValidator,
@@ -16,6 +17,7 @@ wsRouter.post(
   wsontroller.create
 );
 
+// Get Workspaces of User
 wsRouter.get(
   "/:userId",
   requestValidator(getWorkspaceSchema),

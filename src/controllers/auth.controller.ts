@@ -3,12 +3,13 @@ import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
 import z from "zod";
-import { getAvatarSchema, signupSchema, uploadAvatarSchema } from "../@types/req/auth.req";
+import { getAvatarSchema, signupSchema, uniqueUsernameSchema, uploadAvatarSchema } from "../@types/req/auth.req";
 import { VCError } from "../utils/error";
 
 type signupBody = z.infer<typeof signupSchema.shape.body>;
 type uploadAvatarBody = z.infer<typeof uploadAvatarSchema.shape.body>;
 type getAvatarBody = z.infer<typeof getAvatarSchema.shape.params>;
+type isUsernameUniqueParams = z.infer<typeof uniqueUsernameSchema.shape.params>;
 
 export class AuthController extends BaseController {
   constructor(private authService: AuthService) {
@@ -85,6 +86,12 @@ export class AuthController extends BaseController {
   getUser = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
       return this.authService.getUser(req.user);
+    });
+  };
+
+  isUniqueUsername = (req: Request<isUsernameUniqueParams>, res: Response, next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      return (await this.authService.isUniqueUsername(req.params.oldUsername))
     });
   };
 

@@ -11,6 +11,7 @@ import { BUCKETS } from "../config/buckets";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getPrismaInstance } from "../db";
 import { v4 } from "uuid";
+import { VCError } from "../utils/error";
 // POST   /video/upload-on/{provider}/{id}   —   Upload on third-party streaming platform
 
 export class VideoService {
@@ -32,23 +33,34 @@ export class VideoService {
     commitMessage: string,
     user: string
   ) {
-    // Create version record
-    // const { id } = await this.prisma.versions.create({
-    //   data: {
-    //     branch,
-    //     commitMessage,
-    //     parentVersion: null,
-    //   },
-    // });
+    /*
+      Flow
+        1. Create Version
+        2. Send Signed URL
+        3. Add videos records in image
+    */
 
+    // 1. Create version record
+    const versionId = v4()
+    await this.prisma.versions.create({
+      data: {
+        id: versionId,
+        branch,
+        commitMessage,
+        parentVersion: null,
+      },
+    }).catch(err => { throw new VCError(400, err.message) });
+
+
+    // 2. Send Signed URL
     const videoId = v4();
-    const fileKey = `${user}/${workspace}/${videoId}.${contentType.split("/")[1]}`;
+    const fileKey = `${user}/${workspace}/${versionId}/${videoId}.${contentType.split("/")[1]}`;
+
     const command = new PutObjectCommand({
       Bucket: BUCKETS.VC_RAW_VIDEOS,
       Key: fileKey,
       ContentType: contentType,
     });
-
 
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
     return { uploadUrl, fileKey };

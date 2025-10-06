@@ -152,11 +152,21 @@ export class AuthService {
     }
   }
 
+  async isUniqueUsername(oldUsername: string) {
+    const prisma = getPrismaInstance();
+    const user = await prisma.user
+      .findFirst({ where: { username: oldUsername } })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
+
+    return user ? true : false;
+  };
+
   async updateUser() {
     // which thing can update
     // name
     // username
-    // passwordHash
     // avatarUrl
   }
 }

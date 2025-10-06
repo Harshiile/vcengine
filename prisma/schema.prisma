@@ -59,12 +59,13 @@ model Videos {
   workspace    String
   width        Int
   height       Int
+  version      String
   state        VideoState
   playlistFile String
   createdAt    DateTime   @default(now())
 
-  Workspace     Workspace       @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  VideoVersions VideoVersions[]
+  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Version   Versions  @relation(fields: [version], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Segment {
@@ -96,8 +97,8 @@ model Versions {
   parent   Versions?  @relation("versionToChildern", fields: [parentVersion], references: [id])
   children Versions[] @relation("versionToChildern")
 
-  VideoVersions VideoVersions[]
-  Branch        Branch[]
+  Branch Branch[]
+  Videos Videos[]
 }
 
 enum changeType {
@@ -105,16 +106,6 @@ enum changeType {
   Modified
   Revert
   Remove
-}
-
-model VideoVersions {
-  id         String     @id @default(uuid())
-  video      String
-  version    String
-  changeType changeType
-
-  Video    Videos   @relation(references: [id], fields: [video])
-  Versions Versions @relation(references: [id], fields: [version])
 }
 
 enum IssuesState {

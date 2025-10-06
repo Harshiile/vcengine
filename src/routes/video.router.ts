@@ -7,41 +7,37 @@ import {
   getMaxResolutionSchema,
   getPlaylistSchema,
   getSegmentSchema,
-  getSignedUrlSchema,
 } from "../@types/req/video.req";
+import { getSignedUrlSchema } from "../@types/req";
 
 export const videoRouter = Router();
 
 const videoController = new VideoController(new VideoService());
 
-// For avatar & banner
+// Video Upload
 videoRouter.post(
   "/upload",
   requestValidator(uploadVideoSchema),
   videoController.uploadVideo
 );
-videoRouter.post(
-  "/get-signed-url",
-  requestValidator(getSignedUrlSchema),
-  videoController.uploadVideo
-);
+
+// Get Playlist File
 videoRouter.get(
   "/playlist/:workspace/:version/:resolution",
   requestValidator(getPlaylistSchema),
   videoController.getPlaylist
 );
+
+// Get Segments
 videoRouter.get(
   "/segments/:segmentHash",
   requestValidator(getSegmentSchema),
   videoController.getSegment
 );
+
+// Get Max Resolution of Workspace
 videoRouter.get(
   "/max-resolution/:workspace",
   requestValidator(getMaxResolutionSchema),
   videoController.getmaxResolution
 );
-videoRouter.get("/download", videoController.downloadVideo);
-videoRouter.post("/version", videoController.createVersion);
-videoRouter.get("/versions", videoController.getVersions);
-videoRouter.post("/comment", videoController.addComment);
-videoRouter.get("/comments", videoController.getComments);

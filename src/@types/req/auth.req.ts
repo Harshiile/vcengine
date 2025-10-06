@@ -31,3 +31,9 @@ export const getAvatarSchema = z.object({
     userId: z.string(notProvidedError("User Id")),
   }),
 });
+
+export const uniqueUsernameSchema = z.object({
+  params: z.object({
+    oldUsername: z.string(notProvidedError("Username")),
+  }),
+});
