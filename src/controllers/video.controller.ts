@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
-import { uploadVideoSchema } from "../@types/req/video.req";
+import { uploadVideoSchema } from "../@types/requests/video.req";
 
 type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
 

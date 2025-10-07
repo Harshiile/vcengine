@@ -1,11 +1,11 @@
 import z from "zod";
-import { workspaceCreateSchema } from "../@types/req/workspace.req";
+import { createWorkspaceSchema } from "../@types/requests/workspace.req";
 import { getPrismaInstance } from "../db";
 import { v4 } from "uuid";
 import { VCError } from "../utils/error";
 
 type workspaceType = z.infer<
-  typeof workspaceCreateSchema.shape.body.shape.type
+  typeof createWorkspaceSchema.shape.body.shape.type
 >;
 
 export class WorkspaceService {

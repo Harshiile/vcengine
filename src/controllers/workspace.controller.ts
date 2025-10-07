@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import z from "zod";
-import { getWorkspaceSchema, workspaceCreateSchema } from "../@types/req/workspace.req";
+import { getWorkspaceSchema, createWorkspaceSchema } from "../@types/requests/workspace.req";
 
-type wsCreateBody = z.infer<typeof workspaceCreateSchema.shape.body>;
+type wsCreateBody = z.infer<typeof createWorkspaceSchema.shape.body>;
 type wsGetParams = z.infer<typeof getWorkspaceSchema.shape.params>;
 
 export class WorkspaceController extends BaseController {

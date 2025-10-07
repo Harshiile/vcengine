@@ -7,8 +7,8 @@ import {
   getMaxResolutionSchema,
   getPlaylistSchema,
   getSegmentSchema,
-} from "../@types/req/video.req";
-import { getSignedUrlSchema } from "../@types/req";
+} from "../@types/requests/video.req";
+import { getSignedUrlSchema } from "../@types/requests";
 
 export const videoRouter = Router();
 

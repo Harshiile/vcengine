@@ -26,6 +26,8 @@ export class AuthService {
     avatar: string | undefined
   ) {
     const prisma = getPrismaInstance();
+
+    // Fetch user - to check whether user already exists
     const user = await prisma.user.findFirst({ where: { email } });
     if (user) throw new VCError(409, "User already exists");
 
@@ -33,6 +35,7 @@ export class AuthService {
     const hashedPassword = await hash(password, 3);
     const { refreshToken, accessToken } = this.getTokens(email, userId);
 
+    // Add DB Record
     await prisma.user
       .create({
         data: {
@@ -49,9 +52,9 @@ export class AuthService {
         throw err;
       });
 
-
     return {
-      accessToken, user: {
+      accessToken,
+      user: {
         id: userId,
         username,
         name
@@ -61,6 +64,8 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const prisma = getPrismaInstance();
+
+    // Fetch user - to check whether user already exists
     const user = await prisma.user
       .findFirst({ where: { email } })
       .catch((err: any) => {
@@ -87,8 +92,6 @@ export class AuthService {
         throw err;
       });
 
-
-
     return {
       accessToken, user: {
         id: user.id,
@@ -100,8 +103,9 @@ export class AuthService {
 
 
   async uploadAvatar(contentType: string) {
-    const tmpAvatarId = v4()
+    // Avatar File Key
     const avatarKey = `${v4()}.${contentType.split("/")[1]}`
+
     const command = new PutObjectCommand({
       Bucket: BUCKETS.VC_AVATAR,
       Key: avatarKey,
@@ -109,19 +113,23 @@ export class AuthService {
     });
 
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
+
+    // Send Signed Url
     return { uploadUrl, avatarKey };
   }
 
   async getAvatar(userId: string) {
     const prisma = getPrismaInstance();
+
+    // First check whether user exists or not
     const user = await prisma.user
       .findFirst({ where: { id: userId } })
       .catch((err: any) => {
         throw new Error(err.message);
       });
 
-
     if (!user) throw new VCError(404, "User not exists");
+
     if (!user.avatarUrl) return null;
 
     const { Body } = await s3.send(
@@ -130,12 +138,15 @@ export class AuthService {
         Key: user.avatarUrl,
       })
     );
-    return Body as Stream;
 
+    // Send avatar image as stream
+    return Body as Stream;
   }
 
   async getUser(userId: string) {
     const prisma = getPrismaInstance();
+
+    // Get user details
     const user = await prisma.user
       .findFirst({ where: { id: userId } })
       .catch((err: any) => {
@@ -152,8 +163,10 @@ export class AuthService {
     }
   }
 
+  // Check uniqueness of given username
   async isUniqueUsername(oldUsername: string) {
     const prisma = getPrismaInstance();
+
     const user = await prisma.user
       .findFirst({ where: { username: oldUsername } })
       .catch((err: any) => {
@@ -163,10 +176,4 @@ export class AuthService {
     return user ? true : false;
   };
 
-  async updateUser() {
-    // which thing can update
-    // name
-    // username
-    // avatarUrl
-  }
 }

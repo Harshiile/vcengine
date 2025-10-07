@@ -3,27 +3,33 @@ import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
 import z from "zod";
-import { getAvatarSchema, signupSchema, uniqueUsernameSchema, uploadAvatarSchema } from "../@types/req/auth.req";
+import { getAvatarSchema, signupUserSchema, isUsernameUniqueSchema, uploadAvatarSchema } from "../@types/requests/auth.req";
 import { VCError } from "../utils/error";
 
-type signupBody = z.infer<typeof signupSchema.shape.body>;
+// Types
+type signupUserBody = z.infer<typeof signupUserSchema.shape.body>;
 type uploadAvatarBody = z.infer<typeof uploadAvatarSchema.shape.body>;
 type getAvatarBody = z.infer<typeof getAvatarSchema.shape.params>;
-type isUsernameUniqueParams = z.infer<typeof uniqueUsernameSchema.shape.params>;
+type isUsernameUniqueParams = z.infer<typeof isUsernameUniqueSchema.shape.params>;
+
+
 
 export class AuthController extends BaseController {
   constructor(private authService: AuthService) {
     super();
   }
 
+  // Signup the user
   signup = (
-    req: Request<{}, {}, signupBody>,
+    req: Request<{}, {}, signupUserBody>,
     res: Response,
     next: NextFunction
   ): void => {
     this.baseRequest(req, res, next, async () => {
+
       const { email, password, username, name, avatar } = req.body;
 
+      // Service
       const { accessToken, user } = await this.authService.signup(
         email,
         password,
@@ -32,32 +38,45 @@ export class AuthController extends BaseController {
         avatar
       );
 
+      // Set the Cookie as 2 days Expiry
       res.cookie(ENV.ACCESS_TOKEN_NAME, accessToken, {
         maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
       });
 
+      // Return User to client
       return { user }
-
     });
   };
 
+
+  // Login the user
   login = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
+
       const { email, password } = req.body;
+
+      // Service
       const { user, accessToken } = await this.authService.login(
         email,
         password
       );
+
+      // Set the Cookie as 2 days Expiry 
       res.cookie(ENV.ACCESS_TOKEN_NAME, accessToken, {
         maxAge: Number(ENV.ACCESS_TOKEN_EXPIRY),
       });
 
+      // Return User to client
       return { user }
     });
   };
 
+
+  // Logout the user
   logout = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
+
+      // Clear the cookie
       res.clearCookie(ENV.ACCESS_TOKEN_NAME);
     });
   };
@@ -65,39 +84,31 @@ export class AuthController extends BaseController {
 
   uploadAvatar = (req: Request<{}, {}, uploadAvatarBody>, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
+
+      // Get signed url from service
       const { uploadUrl, avatarKey } = await this.authService.uploadAvatar(req.body.contentType)
+
       return { uploadUrl, avatarKey }
     })
   }
 
-  getAvatar = async (req: Request<getAvatarBody>, res: Response, next: NextFunction) => {
-    try {
-      const avatarStream = await this.authService.getAvatar(req.params.userId);
 
-      if (!avatarStream) return null;
-
-      res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
-      avatarStream.pipe(res);
-    }
-    catch (err) { throw new VCError(400, "Unvalid Error") }
-  }
-
-
+  // Fetch user's data
   getUser = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      return this.authService.getUser(req.user);
+      const user = await this.authService.getUser(req.user);
+      if (!user) return null;
+      return {
+        user
+      }
     });
   };
 
+
+  // Check whether given username is unique or not
   isUniqueUsername = (req: Request<isUsernameUniqueParams>, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      return (await this.authService.isUniqueUsername(req.params.oldUsername))
-    });
-  };
-
-  updateUser = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, async () => {
-      return this.authService.updateUser();
+      return (await this.authService.isUniqueUsername(req.params.username))
     });
   };
 }

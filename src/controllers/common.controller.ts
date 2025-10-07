@@ -3,7 +3,7 @@ import { BaseController } from "./base.controller";
 import { CommonService } from "../services/common.service";
 import z from "zod";
 import { Stream } from "stream";
-import { getImageContentSchema, getSignedUrlSchema } from "../@types/req";
+import { getImageContentSchema, getSignedUrlSchema } from "../@types/requests";
 
 export type getSignedUrlBody = z.infer<typeof getSignedUrlSchema.shape.body>
 export type getImageContentParams = z.infer<typeof getImageContentSchema.shape.params>

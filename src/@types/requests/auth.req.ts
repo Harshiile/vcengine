@@ -1,14 +1,15 @@
 import { z } from "zod";
 import { notProvidedError } from "./utils/not-provided";
 
-export const loginSchema = z.object({
+
+export const loginUserSchema = z.object({
   body: z.object({
     email: z.email(notProvidedError("Email")),
     password: z.string().min(8, { error: "Password is too short" }),
   }),
 });
 
-export const signupSchema = z.object({
+export const signupUserSchema = z.object({
   body: z.object({
     email: z.email(notProvidedError("Email")),
     username: z.string(notProvidedError("Username")),
@@ -32,8 +33,8 @@ export const getAvatarSchema = z.object({
   }),
 });
 
-export const uniqueUsernameSchema = z.object({
+export const isUsernameUniqueSchema = z.object({
   params: z.object({
-    oldUsername: z.string(notProvidedError("Username")),
+    username: z.string(notProvidedError("Username")),
   }),
 });

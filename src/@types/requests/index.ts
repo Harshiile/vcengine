@@ -1,5 +1,4 @@
 import z from "zod";
-import { loginSchema, signupSchema } from "./auth.req";
 import { notProvidedError } from "./utils/not-provided";
 
 

@@ -5,7 +5,7 @@ import { Router } from "express";
 import { wsRouter } from "./workspace.router";
 import { authValidator } from "../middleware/authValidator";
 import { requestValidator } from "../middleware/requestValidator";
-import { getImageContentSchema, getSignedUrlSchema } from "../@types/req";
+import { getImageContentSchema, getSignedUrlSchema } from "../@types/requests";
 import { CommonController } from "../controllers/common.controller";
 import { CommonService } from "../services/common.service";
 export const router = Router();
