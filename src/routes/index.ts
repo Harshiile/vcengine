@@ -14,8 +14,8 @@ export const router = Router();
 const commonController = new CommonController(new CommonService())
 
 router.post('/get-signed-url', authValidator, requestValidator(getSignedUrlSchema), commonController.getSignedUrl)
-router.get('/get-image-content/:type/:fileId', requestValidator(getImageContentSchema), commonController.getImageContent)
+router.get('/get-image-content/:type/:fileId', authValidator, requestValidator(getImageContentSchema), commonController.getImageContent)
 
-router.use("/video", authValidator, videoRouter);
+router.use("/video", videoRouter);
 router.use("/auth", authRouter);
 router.use("/workspace", authValidator, wsRouter);

@@ -57,7 +57,8 @@ export class AuthService {
       user: {
         id: userId,
         username,
-        name
+        name,
+        avatar
       }
     };
   }
@@ -97,6 +98,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         username: user.username,
+        avatar: user.avatarUrl
       }
     };
   }
@@ -155,11 +157,12 @@ export class AuthService {
 
     if (!user) return null;
 
-    const { id, name, username } = user
+    const { id, name, username, avatarUrl } = user
     return {
       id,
       name,
       username,
+      avatar: avatarUrl
     }
   }
 

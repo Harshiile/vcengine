@@ -75,7 +75,6 @@ export class AuthController extends BaseController {
   // Logout the user
   logout = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-
       // Clear the cookie
       res.clearCookie(ENV.ACCESS_TOKEN_NAME);
     });

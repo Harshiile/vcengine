@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - pgVCEngineDatabase:/var/lib/postgresql/
+    networks:
+      - vcengine
+    restart: unless-stopped
+
+volumes:
+  pgVCEngineDatabase:
+
+networks:
+  vcengine:
+    driver: bridge

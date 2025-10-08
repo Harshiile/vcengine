@@ -37,8 +37,6 @@ export class CommonController extends BaseController {
 
             const { Body, ContentType } = await this.commonService.getImageContent({ type, fileId });
 
-            console.log(ContentType);
-
             ContentType && res.setHeader("Content-Type", ContentType);
             res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
 

@@ -18,8 +18,13 @@ export class WorkspaceController extends BaseController {
     next: NextFunction
   ): void => {
     this.baseRequest(req, res, next, async () => {
-      const { name, type } = req.body
-      this.workspaceService.createWorkspace(req.user, name, type)
+      const { name, type, branchName, banner } = req.body
+      const { branchId, workspaceId } = await this.workspaceService.createWorkspace(req.user, name, type, branchName, banner)
+
+      return {
+        branchId,
+        workspaceId
+      }
     });
   };
 

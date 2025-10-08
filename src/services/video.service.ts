@@ -76,17 +76,21 @@ export class VideoService {
   }
 
   async getmaxResolution(workspace: string) {
-    const { Contents } = await s3.send(
-      new ListObjectsV2Command({
-        Bucket: BUCKETS.VC_PLAYLIST,
-        Prefix: workspace,
-      })
-    );
+
+    const prisma = getPrismaInstance()
+
+    const resolutions = await prisma.videos.findMany({
+      where: { Workspace: { id: workspace } },
+      select: { height: true }
+    }).catch(err => { throw new VCError(400, err.message) })
+
     let maxResolution = 0;
-    Contents?.map((file) => {
-      const playlistName = file.Key?.split("/")[1];
-      const resolution = playlistName?.split("_")[1]?.split(".")[0];
-      maxResolution = Math.max(maxResolution, Number(resolution));
+    console.log(resolutions);
+
+    resolutions.map(({ height }) => {
+      // console.log(height);
+
+      maxResolution = Math.max(maxResolution, Number(height));
     });
 
     return maxResolution;

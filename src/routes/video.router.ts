@@ -9,6 +9,7 @@ import {
   getSegmentSchema,
 } from "../@types/requests/video.req";
 import { getSignedUrlSchema } from "../@types/requests";
+import { authValidator } from "../middleware/authValidator";
 
 export const videoRouter = Router();
 

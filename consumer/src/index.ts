@@ -58,12 +58,12 @@ const init = async () => {
             };
 
 
-            // await sqs.send(
-            //   new DeleteMessageCommand({
-            //     QueueUrl: sqsUrl,
-            //     ReceiptHandle,
-            //   })
-            // );
+            await sqs.send(
+              new DeleteMessageCommand({
+                QueueUrl: sqsUrl,
+                ReceiptHandle,
+              })
+            );
 
             // Spin the docker image in ECR via ECS fragmate
             new Promise(async (resolve, reject) => {
@@ -72,6 +72,7 @@ const init = async () => {
                 Image: "transcoder-segmentor",
                 name: `transcoder_instance_${Date.now()}`,
                 HostConfig: {
+                  NetworkMode: 'vcengine_vcengine',
                   Binds: [`${path.resolve(".")}:/app/output`],
                 },
                 Env: [

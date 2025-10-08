@@ -3,7 +3,9 @@ import z from "zod";
 export const createWorkspaceSchema = z.object({
   body: z.object({
     name: z.string(),
+    branchName: z.string(),
     type: z.enum(["Public", "Private"]),
+    banner: z.string()
   }),
 });
 

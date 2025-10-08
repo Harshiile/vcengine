@@ -7,6 +7,9 @@ CREATE TYPE "public"."VideoState" AS ENUM ('Processing', 'Uploaded');
 -- CreateEnum
 CREATE TYPE "public"."changeType" AS ENUM ('Add', 'Modified', 'Revert', 'Remove');
 
+-- CreateEnum
+CREATE TYPE "public"."IssuesState" AS ENUM ('Open', 'Closed');
+
 -- CreateTable
 CREATE TABLE "public"."User" (
     "id" TEXT NOT NULL,
@@ -28,7 +31,7 @@ CREATE TABLE "public"."Workspace" (
     "name" TEXT NOT NULL,
     "type" "public"."WorkspaceType" NOT NULL,
     "banner" TEXT,
-    "activeBranch" TEXT NOT NULL,
+    "activeBranch" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Workspace_pkey" PRIMARY KEY ("id")
@@ -37,10 +40,10 @@ CREATE TABLE "public"."Workspace" (
 -- CreateTable
 CREATE TABLE "public"."Videos" (
     "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL DEFAULT 'Untitled Video',
     "workspace" TEXT NOT NULL,
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
+    "version" TEXT NOT NULL,
     "state" "public"."VideoState" NOT NULL,
     "playlistFile" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -61,9 +64,9 @@ CREATE TABLE "public"."Segment" (
 CREATE TABLE "public"."Branch" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "workspace" TEXT NOT NULL,
     "createdBy" TEXT NOT NULL,
-    "headVersion" TEXT NOT NULL,
+    "workspace" TEXT NOT NULL,
+    "headVersion" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
@@ -81,13 +84,16 @@ CREATE TABLE "public"."Versions" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."VideoVersions" (
+CREATE TABLE "public"."Issues" (
     "id" TEXT NOT NULL,
-    "video" TEXT NOT NULL,
-    "version" TEXT NOT NULL,
-    "changeType" "public"."changeType" NOT NULL,
+    "issueNumber" INTEGER NOT NULL,
+    "createdBy" TEXT NOT NULL,
+    "workspace" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "state" "public"."IssuesState" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "VideoVersions_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Issues_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -109,7 +115,7 @@ ALTER TABLE "public"."Workspace" ADD CONSTRAINT "Workspace_createdBy_fkey" FOREI
 ALTER TABLE "public"."Videos" ADD CONSTRAINT "Videos_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."Videos" ADD CONSTRAINT "Videos_version_fkey" FOREIGN KEY ("version") REFERENCES "public"."Versions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -118,10 +124,13 @@ ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_createdBy_fkey" FOREIGN KEY
 ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_headVersion_fkey" FOREIGN KEY ("headVersion") REFERENCES "public"."Versions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "public"."Versions" ADD CONSTRAINT "Versions_parentVersion_fkey" FOREIGN KEY ("parentVersion") REFERENCES "public"."Versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."VideoVersions" ADD CONSTRAINT "VideoVersions_video_fkey" FOREIGN KEY ("video") REFERENCES "public"."Videos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Issues" ADD CONSTRAINT "Issues_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."VideoVersions" ADD CONSTRAINT "VideoVersions_version_fkey" FOREIGN KEY ("version") REFERENCES "public"."Versions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Issues" ADD CONSTRAINT "Issues_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

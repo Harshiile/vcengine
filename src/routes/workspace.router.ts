@@ -20,6 +20,7 @@ wsRouter.post(
 // Get Workspaces of User
 wsRouter.get(
   "/:userId",
+  authValidator,
   requestValidator(getWorkspaceSchema),
   wsontroller.getWorkspaces
 );

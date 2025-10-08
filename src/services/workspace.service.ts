@@ -11,7 +11,7 @@ type workspaceType = z.infer<
 export class WorkspaceService {
   private prisma = getPrismaInstance();
 
-  createWorkspace = async (user: string, name: string, type: workspaceType) => {
+  createWorkspace = async (user: string, name: string, type: workspaceType, branchName: string, banner: string) => {
     const branchId = v4();
 
     // 1. Create Workspace
@@ -21,18 +21,24 @@ export class WorkspaceService {
         name,
         type,
         createdBy: user,
+        banner
       },
     });
 
     //  2. Create Branch
     await this.prisma.branch.create({
       data: {
-        name: "main",
+        name: branchName,
         createdBy: user,
         id: branchId,
         workspace: workspaceId,
       },
     });
+
+    return {
+      branchId,
+      workspaceId
+    }
   };
 
   getWorkspaces = async (userId: string) => {

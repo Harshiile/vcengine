@@ -19,7 +19,7 @@ authRouter.post("/login", requestValidator(loginUserSchema), authController.logi
 
 authRouter.post("/upload-avatar", requestValidator(uploadAvatarSchema), authController.uploadAvatar);
 
-authRouter.post("/logout", authValidator, authController.logout);
+authRouter.get("/logout", authValidator, authController.logout);
 
 authRouter.get("/user", authValidator, authController.getUser);
 
