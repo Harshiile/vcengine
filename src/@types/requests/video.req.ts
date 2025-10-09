@@ -11,11 +11,11 @@ export const uploadVideoSchema = z.object({
 
 export const getPlaylistSchema = z.object({
   params: z.object({
-    version: z.string(),
-    workspace: z.string(),
+    versionId: z.string(),
     resolution: z.string(),
   }),
 });
+
 export const getSegmentSchema = z.object({
   params: z.object({
     segmentHash: z.string(),
@@ -24,6 +24,6 @@ export const getSegmentSchema = z.object({
 
 export const getMaxResolutionSchema = z.object({
   params: z.object({
-    workspace: z.string(),
+    workspaceId: z.string(),
   }),
 });

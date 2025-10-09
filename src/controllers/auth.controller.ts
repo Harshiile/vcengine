@@ -3,14 +3,14 @@ import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
 import z from "zod";
-import { getAvatarSchema, signupUserSchema, isUsernameUniqueSchema, uploadAvatarSchema } from "../@types/requests/auth.req";
+import { signupUserSchema, isUsernameUniqueSchema, uploadAvatarSchema, getUserSchema } from "../@types/requests/auth.req";
 import { VCError } from "../utils/error";
 
 // Types
 type signupUserBody = z.infer<typeof signupUserSchema.shape.body>;
 type uploadAvatarBody = z.infer<typeof uploadAvatarSchema.shape.body>;
-type getAvatarBody = z.infer<typeof getAvatarSchema.shape.params>;
 type isUsernameUniqueParams = z.infer<typeof isUsernameUniqueSchema.shape.params>;
+type getUserParams = z.infer<typeof getUserSchema.shape.params>;
 
 
 
@@ -20,7 +20,7 @@ export class AuthController extends BaseController {
   }
 
   // Signup the user
-  signup = (
+  createUser = (
     req: Request<{}, {}, signupUserBody>,
     res: Response,
     next: NextFunction
@@ -30,7 +30,7 @@ export class AuthController extends BaseController {
       const { email, password, username, name, avatar } = req.body;
 
       // Service
-      const { accessToken, user } = await this.authService.signup(
+      const { accessToken, user } = await this.authService.createUser(
         email,
         password,
         username,
@@ -50,13 +50,13 @@ export class AuthController extends BaseController {
 
 
   // Login the user
-  login = (req: Request, res: Response, next: NextFunction): void => {
+  loginUser = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
 
       const { email, password } = req.body;
 
       // Service
-      const { user, accessToken } = await this.authService.login(
+      const { user, accessToken } = await this.authService.loginUser(
         email,
         password
       );
@@ -73,7 +73,7 @@ export class AuthController extends BaseController {
 
 
   // Logout the user
-  logout = (req: Request, res: Response, next: NextFunction): void => {
+  logoutUser = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
       // Clear the cookie
       res.clearCookie(ENV.ACCESS_TOKEN_NAME);
@@ -92,10 +92,20 @@ export class AuthController extends BaseController {
   }
 
 
-  // Fetch user's data
-  getUser = (req: Request, res: Response, next: NextFunction): void => {
+  fetchMe = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
       const user = await this.authService.getUser(req.user);
+      if (!user) return null;
+      return {
+        user
+      }
+    });
+  };
+
+  // Fetch user's data
+  getUser = (req: Request<getUserParams>, res: Response, next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      const user = await this.authService.getUser(req.params.userId);
       if (!user) return null;
       return {
         user
@@ -108,6 +118,20 @@ export class AuthController extends BaseController {
   isUniqueUsername = (req: Request<isUsernameUniqueParams>, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
       return (await this.authService.isUniqueUsername(req.params.username))
+    });
+  };
+
+  // Update User
+  updateUser = (req: Request<isUsernameUniqueParams>, res: Response, next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      return (await this.authService.updateUser(req.user))
+    });
+  };
+
+  // Delete User
+  deleteUser = (req: Request<isUsernameUniqueParams>, res: Response, next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      return (await this.authService.deleteUser(req.user))
     });
   };
 }

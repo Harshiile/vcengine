@@ -13,7 +13,7 @@ export class WorkspaceController extends BaseController {
     super();
   }
 
-  create = (
+  createWorkspace = (
     req: Request<{}, {}, wsCreateBody>,
     res: Response,
     next: NextFunction

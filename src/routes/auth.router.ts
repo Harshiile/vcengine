@@ -3,25 +3,30 @@ import { AuthController } from "../controllers/auth.controller";
 import { AuthService } from "../services/auth.service";
 import { requestValidator } from "../middleware/requestValidator";
 import { authValidator } from "../middleware/authValidator";
-import { getAvatarSchema, loginUserSchema, signupUserSchema, uploadAvatarSchema } from "../@types/requests/auth.req";
+import { getUserSchema, loginUserSchema, signupUserSchema, uploadAvatarSchema } from "../@types/requests/auth.req";
 
 export const authRouter = Router();
 
 const authController = new AuthController(new AuthService());
 
 authRouter.post(
-  "/signup",
-  requestValidator(signupUserSchema),
-  authController.signup
+    "/signup",
+    requestValidator(signupUserSchema),
+    authController.createUser
 );
 
-authRouter.post("/login", requestValidator(loginUserSchema), authController.login);
+authRouter.post("/login", requestValidator(loginUserSchema), authController.loginUser);
+
+authRouter.delete("/users", requestValidator(loginUserSchema), authController.deleteUser);
+
+authRouter.put("/users", requestValidator(loginUserSchema), authController.updateUser);
 
 authRouter.post("/upload-avatar", requestValidator(uploadAvatarSchema), authController.uploadAvatar);
 
-authRouter.get("/logout", authValidator, authController.logout);
+authRouter.get("/logout", authValidator, authController.logoutUser);
 
-authRouter.get("/user", authValidator, authController.getUser);
+authRouter.get("/me", authValidator, authController.fetchMe);
+authRouter.get("/users/:userId", authValidator, requestValidator(getUserSchema), authController.getUser);
 
-authRouter.get("/unique-username/:username", authController.isUniqueUsername);
+authRouter.get("/username-uniqueness/:username", authController.isUniqueUsername);
 

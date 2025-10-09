@@ -18,7 +18,7 @@ export class AuthService {
     };
   }
 
-  async signup(
+  async createUser(
     email: string,
     password: string,
     username: string,
@@ -63,7 +63,7 @@ export class AuthService {
     };
   }
 
-  async login(email: string, password: string) {
+  async loginUser(email: string, password: string) {
     const prisma = getPrismaInstance();
 
     // Fetch user - to check whether user already exists
@@ -166,7 +166,6 @@ export class AuthService {
     }
   }
 
-  // Check uniqueness of given username
   async isUniqueUsername(oldUsername: string) {
     const prisma = getPrismaInstance();
 
@@ -177,6 +176,20 @@ export class AuthService {
       });
 
     return user ? true : false;
+  };
+
+  async deleteUser(userId: string) {
+    const prisma = getPrismaInstance();
+
+    await prisma.user
+      .delete({ where: { id: userId } })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
+  };
+
+
+  async updateUser(userId: string) {
   };
 
 }

@@ -8,8 +8,6 @@ import {
   getPlaylistSchema,
   getSegmentSchema,
 } from "../@types/requests/video.req";
-import { getSignedUrlSchema } from "../@types/requests";
-import { authValidator } from "../middleware/authValidator";
 
 export const videoRouter = Router();
 
@@ -24,7 +22,7 @@ videoRouter.post(
 
 // Get Playlist File
 videoRouter.get(
-  "/playlist/:workspace/:version/:resolution",
+  "/:versionId/playlist/:resolution",
   requestValidator(getPlaylistSchema),
   videoController.getPlaylist
 );
@@ -33,12 +31,12 @@ videoRouter.get(
 videoRouter.get(
   "/segments/:segmentHash",
   requestValidator(getSegmentSchema),
-  videoController.getSegment
+  videoController.getSegments
 );
 
 // Get Max Resolution of Workspace
 videoRouter.get(
-  "/max-resolution/:workspace",
+  "/:workspaceId/max-resolution",
   requestValidator(getMaxResolutionSchema),
   videoController.getmaxResolution
 );

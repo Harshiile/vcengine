@@ -14,12 +14,12 @@ wsRouter.post(
   "/",
   authValidator,
   requestValidator(createWorkspaceSchema),
-  wsontroller.create
+  wsontroller.createWorkspace
 );
 
 // Get Workspaces of User
 wsRouter.get(
-  "/:userId",
+  "/users/:userId",
   authValidator,
   requestValidator(getWorkspaceSchema),
   wsontroller.getWorkspaces
@@ -27,7 +27,7 @@ wsRouter.get(
 
 // Get Versions of Workspaces
 wsRouter.get(
-  "/versions/:workspaceId",
+  "/:workspaceId/versions",
   authValidator,
   requestValidator(getVersionsSchema),
   wsontroller.getVersions

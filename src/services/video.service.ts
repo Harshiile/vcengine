@@ -72,7 +72,7 @@ export class VideoService {
     return (await this.getStream(fileKey, BUCKETS.VC_PLAYLIST)) as Stream;
   }
 
-  async getSegment(segmentKey: string) {
+  async getSegments(segmentKey: string) {
     return (await this.getStream(segmentKey, BUCKETS.VC_SEGMENTS)) as Stream;
   }
 
@@ -93,8 +93,4 @@ export class VideoService {
   }
 
   async downloadVideo() { }
-  async createVersion() { }
-  async getVersions() { }
-  async addComment() { }
-  async getComments() { }
 }

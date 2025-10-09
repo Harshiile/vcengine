@@ -49,11 +49,11 @@ export class VideoController extends BaseController {
     }
   };
 
-  getSegment = async (req: Request, res: Response, next: NextFunction) => {
+  getSegments = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { segmentHash } = req.params;
 
-      const segmentStream = await this.videoService.getSegment(segmentHash);
+      const segmentStream = await this.videoService.getSegments(segmentHash);
 
       res.setHeader("Content-Type", "video/MP2T");
       res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day
@@ -75,30 +75,6 @@ export class VideoController extends BaseController {
   downloadVideo = (req: Request, res: Response, next: NextFunction) => {
     this.baseRequest(req, res, next, () => {
       return this.videoService.downloadVideo();
-    });
-  };
-
-  addComment = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, () => {
-      return this.videoService.addComment();
-    });
-  };
-
-  getComments = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, () => {
-      return this.videoService.getComments();
-    });
-  };
-
-  createVersion = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, () => {
-      return this.videoService.createVersion();
-    });
-  };
-
-  getVersions = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, () => {
-      return this.videoService.getVersions();
     });
   };
 }

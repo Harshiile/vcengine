@@ -27,14 +27,14 @@ export const uploadAvatarSchema = z.object({
   }),
 });
 
-export const getAvatarSchema = z.object({
-  params: z.object({
-    userId: z.string(notProvidedError("User Id")),
-  }),
-});
-
 export const isUsernameUniqueSchema = z.object({
   params: z.object({
     username: z.string(notProvidedError("Username")),
+  }),
+});
+
+export const getUserSchema = z.object({
+  params: z.object({
+    userId: z.string(notProvidedError("Username")),
   }),
 });
