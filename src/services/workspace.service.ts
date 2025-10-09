@@ -54,11 +54,21 @@ export class WorkspaceService {
           createdAt: true,
           name: true,
           type: true,
-          Branch: { select: { id: true, name: true } },
+          Branch: {
+            select: { id: true, name: true }
+          }
         },
       })
       .catch(err => { throw new VCError(400, err.message) });
-
     return { workspaces }
+  }
+
+
+  getVersions = async (workspaceId: string) => {
+    const versions = await this.prisma.versions.findMany({
+      where: { Videos: { every: { Workspace: { id: workspaceId } } } }
+    })
+
+    return { versions }
   }
 }

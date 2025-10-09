@@ -14,3 +14,9 @@ export const getWorkspaceSchema = z.object({
     userId: z.string(),
   }),
 });
+
+export const getVersionsSchema = z.object({
+  params: z.object({
+    workspaceId: z.string(),
+  }),
+});

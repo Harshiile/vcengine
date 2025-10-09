@@ -16,6 +16,7 @@ import { VCError } from "../utils/error";
 
 export class VideoService {
   private prisma = getPrismaInstance();
+
   private async getStream(fileKey: string, bucketName: string) {
     const { Body } = await s3.send(
       new GetObjectCommand({
@@ -77,19 +78,14 @@ export class VideoService {
 
   async getmaxResolution(workspace: string) {
 
-    const prisma = getPrismaInstance()
-
-    const resolutions = await prisma.videos.findMany({
+    const resolutions = await this.prisma.videos.findMany({
       where: { Workspace: { id: workspace } },
       select: { height: true }
     }).catch(err => { throw new VCError(400, err.message) })
 
     let maxResolution = 0;
-    console.log(resolutions);
 
     resolutions.map(({ height }) => {
-      // console.log(height);
-
       maxResolution = Math.max(maxResolution, Number(height));
     });
 
