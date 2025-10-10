@@ -9,6 +9,14 @@ export const loginUserSchema = z.object({
   }),
 });
 
+export const updateUserSchema = z.object({
+  body: z.object({
+    name: z.string().optional(),
+    username: z.string().optional(),
+    avatarUrl: z.string().optional()
+  }),
+});
+
 export const signupUserSchema = z.object({
   body: z.object({
     email: z.email(notProvidedError("Email")),

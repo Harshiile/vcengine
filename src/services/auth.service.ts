@@ -166,11 +166,11 @@ export class AuthService {
     }
   }
 
-  async isUniqueUsername(oldUsername: string) {
+  async isUniqueUsername(username: string) {
     const prisma = getPrismaInstance();
 
     const user = await prisma.user
-      .findFirst({ where: { username: oldUsername } })
+      .findFirst({ where: { username: username } })
       .catch((err: any) => {
         throw new Error(err.message);
       });
@@ -189,7 +189,21 @@ export class AuthService {
   };
 
 
-  async updateUser(userId: string) {
-  };
+  async updateUser(userId: string, name: string | undefined, username: string | undefined, avatarUrl: string | undefined) {
+    const prisma = getPrismaInstance();
 
+    if (username) {
+      const isUsernameExist = await this.isUniqueUsername(username)
+      if (isUsernameExist) throw new VCError(409, "Username already exists")
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(avatarUrl && { avatarUrl }),
+        ...(name && { name }),
+        ...(username && { username }),
+      }
+    }).catch(err => { throw err })
+  };
 }

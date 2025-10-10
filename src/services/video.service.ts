@@ -49,13 +49,21 @@ export class VideoService {
         branch,
         commitMessage,
         parentVersion: null,
+        workspace
       },
     }).catch(err => { throw new VCError(400, err.message) });
 
 
+    await this.prisma.branch.update({
+      where: { id: branch },
+      data: {
+        activeVersion: versionId
+      }
+    }).catch(err => { throw new VCError(400, err.message) });
+
     // 2. Send Signed URL
     const videoId = v4();
-    const fileKey = `${user}/${workspace}/${versionId}/${videoId}.${contentType.split("/")[1]}`;
+    const fileKey = `${workspace}/${versionId}/${videoId}/v.${contentType.split("/")[1]}`;
 
     const command = new PutObjectCommand({
       Bucket: BUCKETS.VC_RAW_VIDEOS,

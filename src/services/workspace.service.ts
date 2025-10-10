@@ -11,7 +11,7 @@ type workspaceType = z.infer<
 export class WorkspaceService {
   private prisma = getPrismaInstance();
 
-  createWorkspace = async (user: string, name: string, type: workspaceType, branchName: string, banner: string) => {
+  createWorkspace = async (user: string, name: string, type: workspaceType, branchName: string, banner: string | undefined) => {
     const branchId = v4();
 
     // 1. Create Workspace
@@ -23,23 +23,23 @@ export class WorkspaceService {
         createdBy: user,
         banner
       },
-    });
+    }).catch(err => { throw err });
 
     //  2. Create Branch
     await this.prisma.branch.create({
       data: {
         name: branchName,
-        createdBy: user,
         id: branchId,
         workspace: workspaceId,
       },
-    });
+    }).catch(err => { throw err });
 
     return {
       branchId,
       workspaceId
     }
   };
+
 
   getWorkspaces = async (userId: string) => {
     const prisma = getPrismaInstance()
@@ -70,5 +70,45 @@ export class WorkspaceService {
     })
 
     return { versions }
+  }
+
+  async isUniqueWorkspace(workspaceName: string) {
+    const prisma = getPrismaInstance();
+
+    const user = await prisma.workspace
+      .findFirst({ where: { name: workspaceName } })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
+
+    return user ? true : false;
+  };
+
+  createBranch = async (workspaceId: string, createdFromVersion: string, name: string) => {
+    const prisma = getPrismaInstance()
+
+    // We have to create new version record for new created branch which is its base version
+
+    const versionId = v4()
+
+    const { id: branchId } = await prisma.branch.create({
+      data: {
+        name,
+        workspace: workspaceId,
+        activeVersion: versionId,
+        createdFromVersion,
+      }
+    })
+
+    // Then create branch
+    await prisma.versions.create({
+      data: {
+        id: versionId,
+        commitMessage: "init",
+        branch: branchId,
+        workspace: workspaceId,
+        parentVersion: null,
+      }
+    })
   }
 }

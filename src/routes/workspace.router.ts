@@ -2,7 +2,7 @@ import { Router } from "express";
 import { WorkspaceController } from "../controllers/workspace.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import { requestValidator } from "../middleware/requestValidator";
-import { getWorkspaceSchema, createWorkspaceSchema, getVersionsSchema } from "../@types/requests/workspace.req";
+import { getWorkspaceSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema } from "../@types/requests/workspace.req";
 import { authValidator } from "../middleware/authValidator";
 
 export const wsRouter = Router();
@@ -12,7 +12,6 @@ const wsontroller = new WorkspaceController(new WorkspaceService());
 // Create Workspace
 wsRouter.post(
   "/",
-  authValidator,
   requestValidator(createWorkspaceSchema),
   wsontroller.createWorkspace
 );
@@ -20,7 +19,6 @@ wsRouter.post(
 // Get Workspaces of User
 wsRouter.get(
   "/users/:userId",
-  authValidator,
   requestValidator(getWorkspaceSchema),
   wsontroller.getWorkspaces
 );
@@ -28,7 +26,20 @@ wsRouter.get(
 // Get Versions of Workspaces
 wsRouter.get(
   "/:workspaceId/versions",
-  authValidator,
   requestValidator(getVersionsSchema),
   wsontroller.getVersions
+);
+
+// Create Branch
+wsRouter.post(
+  "/branches",
+  requestValidator(createBranchSchema),
+  wsontroller.createBranch
+);
+
+// Create Branch
+wsRouter.get(
+  "/uniqueness/:workspaceName",
+  requestValidator(isWorkspaceUniqueSchema),
+  wsontroller.isUniqueWorkspace
 );

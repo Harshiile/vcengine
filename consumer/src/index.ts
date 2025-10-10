@@ -41,23 +41,16 @@ const init = async () => {
       for (const msg of Messages) {
         const { Body, ReceiptHandle } = msg;
         if (Body) {
-          console.log(JSON.parse(Body));
 
           const records = JSON.parse(Body).Records;
           if (records) {
             const {
-              s3: { object, bucket },
+              s3: { object },
             } = JSON.parse(Body).Records[0];
-            console.log({ object, bucket });
 
             const videoName = object.key;
 
             // Just delete message now - Store state if message our push state again
-            const oldMessageState = {
-              videoName,
-            };
-
-
             await sqs.send(
               new DeleteMessageCommand({
                 QueueUrl: sqsUrl,
@@ -95,6 +88,21 @@ const init = async () => {
               resolve(result);
             }).catch(async (err) => {
               // Resend message Delete
+              const messageBody = {
+                Records: [
+                  {
+                    s3: {
+                      object: {
+                        key: videoName
+                      }
+                    }
+                  }
+                ]
+              }
+              await sqs.send(new SendMessageCommand({
+                MessageBody: JSON.stringify(messageBody),
+                QueueUrl: sqsUrl
+              }))
             });
           }
         }

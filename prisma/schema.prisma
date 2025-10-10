@@ -25,7 +25,6 @@ model User {
   createdAt    DateTime @default(now())
 
   Workspace Workspace[]
-  Branch    Branch[]
   Issues    Issues[]
 }
 
@@ -43,10 +42,11 @@ model Workspace {
   activeBranch String?
   createdAt    DateTime      @default(now())
 
-  User   User     @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Videos Videos[]
-  Branch Branch[]
-  Issues Issues[]
+  User     User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade) // If user deleted then workspace also
+  Videos   Videos[]
+  Branch   Branch[]
+  Versions Versions[]
+  Issues   Issues[]
 }
 
 enum VideoState {
@@ -61,11 +61,11 @@ model Videos {
   height       Int
   version      String
   state        VideoState
-  playlistFile String
+  playlistfile String
   createdAt    DateTime   @default(now())
 
-  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Version   Versions  @relation(fields: [version], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Workspace Workspace @relation(fields: [workspace], references: [id], onDelete: Cascade, onUpdate: Cascade) // If workspace deleted then videos also
+  Version   Versions  @relation(fields: [version], references: [id], onDelete: Cascade, onUpdate: Cascade) // If version deleted then videos also
 }
 
 model Segment {
@@ -75,30 +75,28 @@ model Segment {
 }
 
 model Branch {
-  id          String   @id @default(uuid())
-  name        String
-  createdBy   String
-  workspace   String
-  headVersion String?
-  createdAt   DateTime @default(now())
+  id                 String   @id @default(uuid())
+  name               String
+  workspace          String
+  createdFromVersion String?
+  activeVersion      String?
+  createdAt          DateTime @default(now())
 
-  User      User       @relation(fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Version   Versions?  @relation(fields: [headVersion], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Workspace Workspace? @relation(fields: [workspace], references: [id])
+  Workspace Workspace? @relation(fields: [workspace], references: [id], onUpdate: Cascade, onDelete: Cascade) // If workspace deleted then branch also
+  Versions  Versions[]
 }
 
 model Versions {
   id            String   @id @default(uuid())
   branch        String
+  workspace     String
   commitMessage String
-  parentVersion String?
   createdAt     DateTime @default(now())
+  parentVersion String?
 
-  parent   Versions?  @relation("versionToChildern", fields: [parentVersion], references: [id])
-  children Versions[] @relation("versionToChildern")
-
-  Branch Branch[]
-  Videos Videos[]
+  Branch    Branch    @relation(fields: [branch], references: [id], onDelete: Cascade, onUpdate: Cascade) // If branch deleted then versions also
+  Workspace Workspace @relation(fields: [workspace], references: [id]) // If workspace deleted then versions also
+  Videos    Videos[]
 }
 
 enum changeType {

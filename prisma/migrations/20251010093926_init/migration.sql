@@ -45,7 +45,7 @@ CREATE TABLE "public"."Videos" (
     "height" INTEGER NOT NULL,
     "version" TEXT NOT NULL,
     "state" "public"."VideoState" NOT NULL,
-    "playlistFile" TEXT NOT NULL,
+    "playlistfile" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Videos_pkey" PRIMARY KEY ("id")
@@ -64,9 +64,9 @@ CREATE TABLE "public"."Segment" (
 CREATE TABLE "public"."Branch" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "createdBy" TEXT NOT NULL,
     "workspace" TEXT NOT NULL,
-    "headVersion" TEXT,
+    "createdFromVersion" TEXT,
+    "activeVersion" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
@@ -76,9 +76,10 @@ CREATE TABLE "public"."Branch" (
 CREATE TABLE "public"."Versions" (
     "id" TEXT NOT NULL,
     "branch" TEXT NOT NULL,
+    "workspace" TEXT NOT NULL,
     "commitMessage" TEXT NOT NULL,
-    "parentVersion" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "parentVersion" TEXT,
 
     CONSTRAINT "Versions_pkey" PRIMARY KEY ("id")
 );
@@ -118,16 +119,13 @@ ALTER TABLE "public"."Videos" ADD CONSTRAINT "Videos_workspace_fkey" FOREIGN KEY
 ALTER TABLE "public"."Videos" ADD CONSTRAINT "Videos_version_fkey" FOREIGN KEY ("version") REFERENCES "public"."Versions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_headVersion_fkey" FOREIGN KEY ("headVersion") REFERENCES "public"."Versions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."Versions" ADD CONSTRAINT "Versions_branch_fkey" FOREIGN KEY ("branch") REFERENCES "public"."Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Branch" ADD CONSTRAINT "Branch_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Versions" ADD CONSTRAINT "Versions_parentVersion_fkey" FOREIGN KEY ("parentVersion") REFERENCES "public"."Versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Versions" ADD CONSTRAINT "Versions_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Issues" ADD CONSTRAINT "Issues_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
