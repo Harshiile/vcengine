@@ -9,9 +9,15 @@ export const createWorkspaceSchema = z.object({
   }),
 });
 
-export const getWorkspaceSchema = z.object({
+export const getWorkspaceOfUserSchema = z.object({
   params: z.object({
     userId: z.string(),
+  }),
+});
+
+export const getWorkspaceDetailsSchema = z.object({
+  params: z.object({
+    workspaceId: z.string(),
   }),
 });
 
@@ -32,5 +38,19 @@ export const createBranchSchema = z.object({
 export const isWorkspaceUniqueSchema = z.object({
   params: z.object({
     workspaceName: z.string(),
+  }),
+});
+
+export const createNewVersionSchema = z.object({
+  body: z.object({
+    workspace: z.string(),
+    branch: z.string(),
+    commitMessage: z.string(),
+    changes: z.array(z.object({
+      type: z.enum(["ADD", "REPLACE", "REMOVE"]),
+      startTimestamp: z.number(),
+      endTimestamp: z.number().optional(),
+      newSection: z.string().optional()
+    }))
   }),
 });

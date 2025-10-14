@@ -2,7 +2,7 @@ import { Router } from "express";
 import { WorkspaceController } from "../controllers/workspace.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import { requestValidator } from "../middleware/requestValidator";
-import { getWorkspaceSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema } from "../@types/requests/workspace.req";
+import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, getWorkspaceDetailsSchema, createNewVersionSchema } from "../@types/requests/workspace.req";
 import { authValidator } from "../middleware/authValidator";
 
 export const wsRouter = Router();
@@ -19,8 +19,15 @@ wsRouter.post(
 // Get Workspaces of User
 wsRouter.get(
   "/users/:userId",
-  requestValidator(getWorkspaceSchema),
-  wsontroller.getWorkspaces
+  requestValidator(getWorkspaceOfUserSchema),
+  wsontroller.getUsersWorkspaces
+);
+
+// Get Workspace Details by ID
+wsRouter.get(
+  "/:workspaceId",
+  requestValidator(getWorkspaceDetailsSchema),
+  wsontroller.getWorkspaceDetails
 );
 
 // Get Versions of Workspaces
@@ -42,4 +49,12 @@ wsRouter.get(
   "/uniqueness/:workspaceName",
   requestValidator(isWorkspaceUniqueSchema),
   wsontroller.isUniqueWorkspace
+);
+
+
+// Create New Version
+wsRouter.post(
+  "/versions/new",
+  requestValidator(createNewVersionSchema),
+  wsontroller.createNewVersion
 );

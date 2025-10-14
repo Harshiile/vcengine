@@ -46,3 +46,10 @@ export const getUserSchema = z.object({
     userId: z.string(notProvidedError("Username")),
   }),
 });
+
+export const resetPasswordSchema = z.object({
+  body: z.object({
+    password: z.string(),
+    confirmPassword: z.string(),
+  }),
+});

@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import z from "zod";
-import { getWorkspaceSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema } from "../@types/requests/workspace.req";
+import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, createNewVersionSchema } from "../@types/requests/workspace.req";
 
 type wsCreateBody = z.infer<typeof createWorkspaceSchema.shape.body>;
-type wsGetParams = z.infer<typeof getWorkspaceSchema.shape.params>;
+type wsOfUserGetParams = z.infer<typeof getWorkspaceOfUserSchema.shape.params>;
 type versionGetParams = z.infer<typeof getVersionsSchema.shape.params>;
 type createBranchBody = z.infer<typeof createBranchSchema.shape.body>;
 type isWorkspaceUniqueParams = z.infer<typeof isWorkspaceUniqueSchema.shape.params>;
+export type createNewVersionBody = z.infer<typeof createNewVersionSchema.shape.body>;
 
 export class WorkspaceController extends BaseController {
   constructor(private workspaceService: WorkspaceService) {
@@ -31,13 +32,23 @@ export class WorkspaceController extends BaseController {
     });
   };
 
-  getWorkspaces = (
-    req: Request<wsGetParams>,
+  getWorkspaceDetails = (req: Request<wsOfUserGetParams>,
+    res: Response,
+    next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      const { workspace } = await this.workspaceService.getWorkspaceDetails(req.params.userId);
+      return { workspace }
+    });
+  }
+
+
+  getUsersWorkspaces = (
+    req: Request<wsOfUserGetParams>,
     res: Response,
     next: NextFunction
   ): void => {
     this.baseRequest(req, res, next, async () => {
-      const { workspaces } = await this.workspaceService.getWorkspaces(req.params.userId);
+      const { workspaces } = await this.workspaceService.getUsersWorkspaces(req.params.userId);
       return { workspaces }
     });
   };
@@ -71,4 +82,14 @@ export class WorkspaceController extends BaseController {
       return (await this.workspaceService.isUniqueWorkspace(req.params.workspaceName))
     });
   };
+
+
+  // Add new version
+  createNewVersion = (req: Request<{}, {}, createNewVersionBody>, res: Response, next: NextFunction): void => {
+    this.baseRequest(req, res, next, async () => {
+      const { commitMessage, changes, branch, workspace } = req.body
+      const result = await this.workspaceService.createNewVersion(workspace, branch, commitMessage, changes)
+      return result
+    });
+  }
 }

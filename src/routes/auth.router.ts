@@ -3,7 +3,7 @@ import { AuthController } from "../controllers/auth.controller";
 import { AuthService } from "../services/auth.service";
 import { requestValidator } from "../middleware/requestValidator";
 import { authValidator } from "../middleware/authValidator";
-import { getUserSchema, loginUserSchema, signupUserSchema, updateUserSchema, uploadAvatarSchema } from "../@types/requests/auth.req";
+import { getUserSchema, loginUserSchema, resetPasswordSchema, signupUserSchema, updateUserSchema, uploadAvatarSchema } from "../@types/requests/auth.req";
 
 export const authRouter = Router();
 
@@ -29,4 +29,7 @@ authRouter.get("/me", authValidator, authController.fetchMe);
 authRouter.get("/users/:userId", authValidator, requestValidator(getUserSchema), authController.getUser);
 
 authRouter.get("/username/uniqueness/:username", authController.isUniqueUsername);
+
+authRouter.get("/password/request", authValidator, authController.requestForResetPassword);
+authRouter.post("/password/reset", authValidator, requestValidator(resetPasswordSchema), authController.resetPassword);
 

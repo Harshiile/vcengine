@@ -63,7 +63,7 @@ export class VideoService {
 
     // 2. Send Signed URL
     const videoId = v4();
-    const fileKey = `${workspace}/${versionId}/${videoId}/v.${contentType.split("/")[1]}`;
+    const fileKey = `${workspace}/${versionId}/video.${contentType.split("/")[1]}`;
 
     const command = new PutObjectCommand({
       Bucket: BUCKETS.VC_RAW_VIDEOS,

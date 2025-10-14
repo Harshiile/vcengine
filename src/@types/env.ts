@@ -8,4 +8,9 @@ export const envSchema = z.object({
   IAM_SECRET_KEY: z.string(),
   ACCESS_TOKEN_EXPIRY: z.string(),
   ACCESS_TOKEN_NAME: z.string(),
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.string(),
+  MAIL_EMAIL: z.string(),
+  MAIL_PASSKEY: z.string(),
+  FRONT_END_URL: z.string(),
 });

@@ -9,6 +9,7 @@ import { BUCKETS } from "../config/buckets";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../config/s3";
 import z from "zod";
+import { EmailService } from "./mail.service";
 
 export class AuthService {
   private getTokens(email: string, userId: string) {
@@ -206,4 +207,41 @@ export class AuthService {
       }
     }).catch(err => { throw err })
   };
+
+
+  async requestForResetPassword(userId: string) {
+    const prisma = getPrismaInstance()
+
+    const res = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { email: true }
+    }).catch(err => { throw err })
+
+    new EmailService().sendMail(res?.email!)
+  }
+
+  async resetPassword(userId: string, password: string, confirmPassword: string) {
+
+    if (confirmPassword != password) throw new VCError(400, "Password not match")
+
+    const prisma = getPrismaInstance()
+
+    const userEmail = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { email: true }
+    }).catch(err => { throw err })
+
+    if (!userEmail?.email) throw new VCError(404, "Email not found")
+
+    const hashedPassword = await hash(password, 3);
+    const { refreshToken } = this.getTokens(userEmail.email, userId);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: hashedPassword,
+        refreshToken
+      }
+    }).catch(err => { throw err })
+  }
 }
