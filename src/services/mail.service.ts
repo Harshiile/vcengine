@@ -8,15 +8,14 @@ export class EmailService {
       <body>
         <h4> Reset Password Link </h4>
         <a> ${ENV.FRONT_END_URL}/reset-password </a>
-      </body>
-    </html>
-    `;
+      <body>
+    </html>`
   };
 
   sendMail = async (email: string) => {
     const mailParams = {
       email,
-      title: "Reset Password Mail !",
+      title: "Submission Done !",
       body: this.mailTemplate(),
     };
 

@@ -66,7 +66,6 @@ const init = async () => {
                 name: `transcoder_instance_${Date.now()}`,
                 HostConfig: {
                   NetworkMode: 'vcengine_vcengine',
-                  Binds: [`${path.resolve(".")}:/app/output`],
                 },
                 Env: [
                   `VIDEO_NAME=${videoName}`,

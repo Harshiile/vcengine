@@ -209,15 +209,21 @@ export class AuthService {
   };
 
 
-  async requestForResetPassword(userId: string) {
+  async requestForResetPassword(email: string) {
     const prisma = getPrismaInstance()
 
-    const res = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { email: true }
-    }).catch(err => { throw err })
+    const user = await prisma.user
+      .findFirst({ where: { email } })
+      .catch((err: any) => {
+        throw new Error(err.message);
+      });
 
-    new EmailService().sendMail(res?.email!)
+    if (!user) throw new VCError(404, "User not found");
+
+    new EmailService().sendMail(email)
+    return {
+      message: "Mail sent !!"
+    }
   }
 
   async resetPassword(userId: string, password: string, confirmPassword: string) {

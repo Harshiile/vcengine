@@ -47,6 +47,12 @@ export const getUserSchema = z.object({
   }),
 });
 
+export const requestResetPasswordSchema = z.object({
+  body: z.object({
+    email: z.string(),
+  }),
+});
+
 export const resetPasswordSchema = z.object({
   body: z.object({
     password: z.string(),

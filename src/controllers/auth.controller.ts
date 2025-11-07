@@ -3,7 +3,7 @@ import { AuthService } from "../services/auth.service";
 import { BaseController } from "./base.controller";
 import { ENV } from "../config/env";
 import z from "zod";
-import { signupUserSchema, isUsernameUniqueSchema, uploadAvatarSchema, getUserSchema, updateUserSchema, resetPasswordSchema } from "../@types/requests/auth.req";
+import { signupUserSchema, isUsernameUniqueSchema, uploadAvatarSchema, getUserSchema, updateUserSchema, resetPasswordSchema, requestResetPasswordSchema } from "../@types/requests/auth.req";
 import { VCError } from "../utils/error";
 
 // Types
@@ -13,6 +13,7 @@ type isUsernameUniqueParams = z.infer<typeof isUsernameUniqueSchema.shape.params
 type getUserParams = z.infer<typeof getUserSchema.shape.params>;
 type updateUserBody = z.infer<typeof updateUserSchema.shape.body>;
 type resetPasswordBody = z.infer<typeof resetPasswordSchema.shape.body>;
+type requestResetPasswordBody = z.infer<typeof requestResetPasswordSchema.shape.body>;
 
 
 
@@ -143,13 +144,9 @@ export class AuthController extends BaseController {
   };
 
   // Request for reset password
-  requestForResetPassword = (req: Request, res: Response, next: NextFunction): void => {
+  requestForResetPassword = (req: Request<{}, {}, requestResetPasswordBody>, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      await this.authService.requestForResetPassword(req.user)
-
-      return {
-        message: "Mail Sent !!"
-      }
+      return (await this.authService.requestForResetPassword(req.body.email))
     });
   };
 

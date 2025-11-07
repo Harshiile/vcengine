@@ -13,6 +13,7 @@ import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { BUCKETS } from "../config/buckets";
 import { on } from "events";
 import { VideoService } from "./video.service";
+import { newVersionCreationQueue } from "../redis/queue";
 
 type workspaceType = z.infer<
   typeof createWorkspaceSchema.shape.body.shape.type
@@ -156,125 +157,14 @@ export class WorkspaceService {
 
 
   createNewVersion = async (workspace: string, branch: string, commitMessage: string, changes: createNewVersionBody["changes"]) => {
-    try {
+    // Invoke the docker image - build-new-version 
+    // With Params: Workspace, Branch, Commit Message, Changes, DB_URl, ACCESS_KEY, SECRET_KEY
 
-
-      const downloadVideoPath = path.resolve("video-download.mp4")
-      const outputFolderPath = path.join("./new-video")
-
-      if (!fs.existsSync(outputFolderPath)) fs.mkdirSync(outputFolderPath)
-
-      let partIndex = 1;
-      let globalTimeStamp = 0;
-
-      const downloadVideo = async (bucket: string, key: string, outputPath: string) => {
-        return new Promise(async (resolve, reject) => {
-          const { Body, ContentType, ContentLength } = await s3.send(
-            new GetObjectCommand({
-              Bucket: bucket,
-              Key: key,
-            })
-          );
-
-          const writeStream = fs.createWriteStream(outputPath);
-          const fileBody = Body as Stream;
-          fileBody.pipe(writeStream);
-
-          writeStream.on("finish", () => {
-            console.log("Download Complete !!");
-            resolve(1);
-          });
-          writeStream.on("error", (err) => {
-            console.log(err);
-            reject();
-          });
-        });
-      }
-
-
-      const add_replace_Section = async (newSectionFileKey: string) => {
-        // Download that new added section & name it as part_${partIndex++}
-        await downloadVideo(BUCKETS.VC_AVATAR, newSectionFileKey, `parts_${partIndex++}`).catch(err => { throw err })
-      }
-
-      const coverUp = (forType: string, currentNextTimestamp: number) => {
-        console.log({
-          forType,
-          globalTimeStamp,
-          currentNextTimestamp
-        });
-
-        if (currentNextTimestamp == globalTimeStamp) return;
-
-
-        return new Promise((resolve, reject) => {
-          ffmpeg(downloadVideoPath)
-            .setStartTime(globalTimeStamp)
-            .setDuration(currentNextTimestamp - globalTimeStamp)
-            .output(path.join(outputFolderPath, `part_${partIndex++}.mp4`))
-            .on("end", resolve)
-            .on("error", reject)
-            .run()
-        })
-      }
-
-      type ChangesType = createNewVersionBody["changes"][number]
-
-      changes.sort((a: ChangesType, b: ChangesType) => {
-        return a.startTimestamp - b.startTimestamp
-      })
-
-      // Get latest version
-      // const prisma = getPrismaInstance()
-
-      // const latestVersion = await prisma.versions.findFirst({
-      //   where: { branch, workspace },
-      //   orderBy: { createdAt: "desc" },
-      //   select: { id: true },
-      // }).catch(err => { throw err })
-
-
-
-      // ------------------------------------------------------------------------
-      //  Download the video
-      // ------------------------------------------------------------------------
-      // await downloadVideo(BUCKETS.VC_RAW_VIDEOS, `${workspace}/${latestVersion?.id}/video.mp4`, downloadVideoPath).catch(err => { throw err })
-
-      // Mix the video based on given changes
-      for (const c of changes) {
-        switch (c.type) {
-          // Index of parts must be in ordering
-          case "ADD": {
-            await coverUp("ADD", c.startTimestamp)
-            c.newSection && add_replace_Section(c.newSection).catch(err => { throw err })
-            console.log('Adding Done');
-            break;
-          }
-
-          case "REMOVE": {
-            await coverUp("REMOVE", c.startTimestamp)
-            globalTimeStamp = c.endTimestamp!
-            console.log('Removing Done');
-            break;
-          }
-
-          case "REPLACE": {
-            await coverUp("REPLACE", c.startTimestamp)
-            c.newSection && add_replace_Section(c.newSection).catch(err => { throw err })
-            globalTimeStamp = c.endTimestamp!
-            console.log('Replacing Done');
-            break;
-          }
-        }
-      }
-
-
-      // Contact the video
-
-
-    } catch (error) {
-      console.log(error);
-
-    }
+    await newVersionCreationQueue.add("version_creation", {
+      workspace,
+      branch,
+      commitMessage,
+      changes
+    });
   }
 }
