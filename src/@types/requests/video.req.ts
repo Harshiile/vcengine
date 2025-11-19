@@ -27,3 +27,10 @@ export const getMaxResolutionSchema = z.object({
     workspaceId: z.string(),
   }),
 });
+
+export const downloadVideoSchema = z.object({
+  params: z.object({
+    workspaceId: z.string(),
+    versionId: z.string(),
+  })
+})

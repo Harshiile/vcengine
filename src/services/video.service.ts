@@ -100,5 +100,8 @@ export class VideoService {
     return maxResolution;
   }
 
-  async downloadVideo() { }
+  async downloadVideo(workspaceId: string, versionId: string) {
+    const fileKey = `${workspaceId}/${versionId}/video.mp4`
+    return (await this.getStream(fileKey, BUCKETS.VC_RAW_VIDEOS)) as Stream;
+  }
 }

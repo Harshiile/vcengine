@@ -13,6 +13,14 @@ services:
     networks:
       - vcengine
     restart: unless-stopped
+  
+  redis:
+    image: redis
+    container_name: redis_instance
+    ports:
+      - "6379:6379"
+    networks:
+      - vcengine
 
 volumes:
   pgVCEngineDatabase:

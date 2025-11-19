@@ -5,9 +5,10 @@ import fs from "fs";
 import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
-import { uploadVideoSchema } from "../@types/requests/video.req";
+import { downloadVideoSchema, uploadVideoSchema } from "../@types/requests/video.req";
 
 type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
+type downloadVideoParams = z.infer<typeof downloadVideoSchema.shape.params>;
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
@@ -72,9 +73,16 @@ export class VideoController extends BaseController {
     });
   };
 
-  downloadVideo = (req: Request, res: Response, next: NextFunction) => {
-    this.baseRequest(req, res, next, () => {
-      return this.videoService.downloadVideo();
-    });
+  downloadVideo = async (req: Request<downloadVideoParams>, res: Response, next: NextFunction) => {
+    try {
+      const { versionId, workspaceId } = req.params
+      const videoStream = await this.videoService.downloadVideo(workspaceId, versionId);
+
+      res.setHeader("Content-Type", "video/mp4");
+      res.setHeader("Content-Disposition", `attachment; filename="${versionId}.mp4"`);
+      videoStream.pipe(res)
+    } catch (error) {
+      throw error
+    }
   };
 }

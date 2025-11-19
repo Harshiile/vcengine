@@ -11,9 +11,10 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "run-project": "./scripts/run.sh",
     "dev": "node ./dist/index.js",
     "db:seed": "node dist/db/seed/index.js",
-    "db:start": "docker compose -f docker-compose-db.yaml up",
+    "services:start": "docker compose -f docker-compose-services.yaml up",
     "worker:mail": "node dist/redis/workers/mail_worker.js",
     "worker:version": "node dist/redis/workers/version_worker.js",
     "test": "jest --runInBand"
@@ -26,6 +27,7 @@
     "@types/supertest": "^6.0.3",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.58.2",
+    "concurrently": "^9.2.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dockerode": "^4.0.9",

@@ -14,6 +14,9 @@ const worker = new Worker(
             const container = await docker.createContainer({
                 Image: "build-new-version",
                 name: `build-new-version_${Date.now()}`,
+                HostConfig: {
+                    NetworkMode: 'vcengine_vcengine',
+                },
                 Env: [
                     `WORKSPACE=${workspace}`,
                     `BRANCH=${branch}`,
@@ -21,7 +24,7 @@ const worker = new Worker(
                     `CHANGES_IN_STRING=${JSON.stringify(changes)}`,
                     `ACCESS_KEY=${ENV.IAM_ACCESS_KEY_ID}`,
                     `SECRET_KEY=${ENV.IAM_SECRET_KEY}`,
-                    `DB_URL=${ENV.DB_URL}`,
+                    `DB_URL=postgresql://user:password@postgres_db:5432/postgres`,
                 ],
             });
             const logs = await container.attach({

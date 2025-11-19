@@ -157,9 +157,6 @@ export class WorkspaceService {
 
 
   createNewVersion = async (workspace: string, branch: string, commitMessage: string, changes: createNewVersionBody["changes"]) => {
-    // Invoke the docker image - build-new-version 
-    // With Params: Workspace, Branch, Commit Message, Changes, DB_URl, ACCESS_KEY, SECRET_KEY
-
     await newVersionCreationQueue.add("version_creation", {
       workspace,
       branch,

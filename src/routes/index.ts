@@ -18,4 +18,4 @@ router.get('/storage/images/:type/:fileId', authValidator, requestValidator(getI
 
 router.use("/videos", videoRouter);
 router.use("/auth", authRouter);
-router.use("/workspaces", wsRouter);
+router.use("/workspaces", authValidator, wsRouter);

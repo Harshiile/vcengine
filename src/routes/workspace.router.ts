@@ -51,7 +51,6 @@ wsRouter.get(
   wsontroller.isUniqueWorkspace
 );
 
-
 // Create New Version
 wsRouter.post(
   "/versions/new",

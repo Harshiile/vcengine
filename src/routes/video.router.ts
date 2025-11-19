@@ -7,6 +7,7 @@ import {
   getMaxResolutionSchema,
   getPlaylistSchema,
   getSegmentSchema,
+  downloadVideoSchema,
 } from "../@types/requests/video.req";
 
 export const videoRouter = Router();
@@ -40,3 +41,5 @@ videoRouter.get(
   requestValidator(getMaxResolutionSchema),
   videoController.getmaxResolution
 );
+
+videoRouter.get("/download/:workspaceId/:versionId", requestValidator(downloadVideoSchema), videoController.downloadVideo)
