@@ -43,8 +43,7 @@ export const isWorkspaceUniqueSchema = z.object({
 
 export const createNewVersionSchema = z.object({
   body: z.object({
-    workspace: z.string(),
-    branch: z.string(),
+    oldVersion: z.string(),
     commitMessage: z.string(),
     changes: z.array(z.object({
       type: z.enum(["ADD", "REPLACE", "REMOVE"]),

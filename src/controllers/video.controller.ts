@@ -5,10 +5,12 @@ import fs from "fs";
 import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
-import { downloadVideoSchema, uploadVideoSchema } from "../@types/requests/video.req";
+import { downloadVideoSchema, getMaxResolutionSchema, getPlaylistSchema, uploadVideoSchema } from "../@types/requests/video.req";
 
 type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
 type downloadVideoParams = z.infer<typeof downloadVideoSchema.shape.params>;
+type getPlaylistParams = z.infer<typeof getPlaylistSchema.shape.params>;
+type getMaxResolutionParams = z.infer<typeof getMaxResolutionSchema.shape.params>;
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
@@ -34,11 +36,11 @@ export class VideoController extends BaseController {
   };
 
 
-  getPlaylist = async (req: Request, res: Response, next: NextFunction) => {
+  getPlaylist = async (req: Request<getPlaylistParams>, res: Response, next: NextFunction) => {
     try {
-      const { resolution, version, workspace } = req.params;
+      const { resolution, versionId } = req.params;
       // const fileName = `${workspace}/${version}/playlist_${resolution}.m3u8`;
-      const fileName = `${workspace}/playlist_${resolution}.m3u8`;
+      const fileName = `${versionId}/playlist_${resolution}.m3u8`;
 
       const playlistStream = await this.videoService.getPlaylist(fileName);
 
@@ -64,11 +66,10 @@ export class VideoController extends BaseController {
     }
   };
 
-  getmaxResolution = (req: Request, res: Response, next: NextFunction) => {
+  getmaxResolution = (req: Request<getMaxResolutionParams>, res: Response, next: NextFunction) => {
     this.baseRequest(req, res, next, async () => {
-      const { workspace } = req.params;
-
-      const maxResolution = await this.videoService.getmaxResolution(workspace);
+      const { versionId } = req.params;
+      const maxResolution = await this.videoService.getmaxResolution(versionId);
       return { maxResolution };
     });
   };

@@ -4,7 +4,7 @@ import { notProvidedError } from "./utils/not-provided";
 
 export const getSignedUrlSchema = z.object({
     body: z.object({
-        type: z.enum(["banner", "avatar"]),
+        type: z.enum(["banner", "avatar", "clip"]),
         contentType: z.string(notProvidedError("Content Type")),
     }),
 });

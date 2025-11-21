@@ -87,10 +87,10 @@ export class WorkspaceController extends BaseController {
   // Add new version
   createNewVersion = (req: Request<{}, {}, createNewVersionBody>, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      const { commitMessage, changes, branch, workspace } = req.body
-      await this.workspaceService.createNewVersion(workspace, branch, commitMessage, changes)
+      const { commitMessage, changes, oldVersion } = req.body
+      const message = await this.workspaceService.createNewVersion(oldVersion, commitMessage, changes)
       return {
-        message: "Video is sent for editing"
+        message
       }
     });
   }

@@ -156,12 +156,32 @@ export class WorkspaceService {
 
 
 
-  createNewVersion = async (workspace: string, branch: string, commitMessage: string, changes: createNewVersionBody["changes"]) => {
+  createNewVersion = async (oldVersion: string, commitMessage: string, changes: createNewVersionBody["changes"]) => {
+    const prisma = getPrismaInstance()
+
+    const previousVersion = await prisma.versions.findFirst({
+      where: {
+        id: oldVersion
+      },
+      select: {
+        branch: true,
+        workspace: true
+      }
+    }).catch((err: any) => {
+      throw new Error(err.message);
+    });
+
+    if (!previousVersion) {
+      return "Version Id is not associated with any workspace & branch"
+    }
+
     await newVersionCreationQueue.add("version_creation", {
-      workspace,
-      branch,
+      workspace: previousVersion?.workspace,
+      branch: previousVersion?.branch,
       commitMessage,
       changes
     });
+
+    return "Video is sent for editing"
   }
 }

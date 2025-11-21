@@ -37,7 +37,7 @@ videoRouter.get(
 
 // Get Max Resolution of Workspace
 videoRouter.get(
-  "/:workspaceId/max-resolution",
+  "/:versionId/max-resolution",
   requestValidator(getMaxResolutionSchema),
   videoController.getmaxResolution
 );

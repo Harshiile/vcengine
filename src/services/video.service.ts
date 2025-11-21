@@ -84,10 +84,10 @@ export class VideoService {
     return (await this.getStream(segmentKey, BUCKETS.VC_SEGMENTS)) as Stream;
   }
 
-  async getmaxResolution(workspace: string) {
+  async getmaxResolution(versionId: string) {
 
     const resolutions = await this.prisma.videos.findMany({
-      where: { Workspace: { id: workspace } },
+      where: { version: versionId },
       select: { height: true }
     }).catch(err => { throw new VCError(400, err.message) })
 

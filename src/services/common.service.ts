@@ -9,9 +9,23 @@ import { s3 } from "../config/s3";
 export class CommonService {
     async getSignedUrl({ contentType, type }: getSignedUrlBody) {
         const fileKey = `${v4()}.${contentType.split("/")[1]}`
+        let bucketType;
+
+        switch (type) {
+            case 'avatar':
+                bucketType = BUCKETS.VC_AVATAR
+                break;
+
+            case 'clip':
+                bucketType = BUCKETS.VC_CLIPS
+                break;
+            case 'banner':
+                bucketType = BUCKETS.VC_BANNER
+                break;
+        }
 
         const command = new PutObjectCommand({
-            Bucket: type == "avatar" ? BUCKETS.VC_AVATAR : BUCKETS.VC_BANNER,
+            Bucket: bucketType,
             Key: fileKey,
             ContentType: contentType,
         });

@@ -24,7 +24,7 @@ export const getSegmentSchema = z.object({
 
 export const getMaxResolutionSchema = z.object({
   params: z.object({
-    workspaceId: z.string(),
+    versionId: z.string(),
   }),
 });
 
