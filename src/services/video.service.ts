@@ -76,8 +76,8 @@ export class VideoService {
   }
 
 
-  async getPlaylist(fileKey: string) {
-    return (await this.getStream(fileKey, BUCKETS.VC_PLAYLIST)) as Stream;
+  async getPlaylist<T>(fileKey: string) {
+    return (await this.getStream(fileKey, BUCKETS.VC_PLAYLIST)) as T;
   }
 
   async getSegments(segmentKey: string) {
@@ -103,5 +103,9 @@ export class VideoService {
   async downloadVideo(workspaceId: string, versionId: string) {
     const fileKey = `${workspaceId}/${versionId}/video.mp4`
     return (await this.getStream(fileKey, BUCKETS.VC_RAW_VIDEOS)) as Stream;
+  }
+
+  async downloadSegmentsAsVideo(fileKey: string) {
+    return (this.getStream(fileKey, BUCKETS.VC_PLAYLIST));
   }
 }

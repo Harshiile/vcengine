@@ -108,7 +108,14 @@ export class WorkspaceService {
 
   getVersions = async (workspaceId: string) => {
     const versions = await this.prisma.versions.findMany({
-      where: { Videos: { every: { Workspace: { id: workspaceId } } } }
+      where: {
+        Videos: {
+          every: {
+            Workspace: { id: workspaceId }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
     })
 
     return { versions }
@@ -125,6 +132,32 @@ export class WorkspaceService {
 
     return user ? true : false;
   };
+
+
+  getBranch = async (workspaceId: string) => {
+    const prisma = getPrismaInstance()
+
+    let branchesResult = await prisma.branch.findMany({
+      where: { workspace: workspaceId },
+      select: {
+        id: true,
+        name: true,
+        activeVersion: true,
+        Versions: { select: { id: true, commitMessage: true, createdAt: true } },
+        Workspace: { select: { activeBranch: true } }
+      },
+    })
+
+    const branches = branchesResult.map(b => ({
+      id: b.id,
+      name: b.name,
+      activeVersion: b.activeVersion,
+      versions: b.Versions,
+      workspaces: b.Workspace
+    }));
+
+    return { branches }
+  }
 
   createBranch = async (workspaceId: string, createdFromVersion: string, name: string) => {
     const prisma = getPrismaInstance()
@@ -153,8 +186,6 @@ export class WorkspaceService {
       }
     })
   }
-
-
 
   createNewVersion = async (oldVersion: string, commitMessage: string, changes: createNewVersionBody["changes"]) => {
     const prisma = getPrismaInstance()

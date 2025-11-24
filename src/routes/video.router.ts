@@ -42,4 +42,8 @@ videoRouter.get(
   videoController.getmaxResolution
 );
 
-videoRouter.get("/download/:workspaceId/:versionId", requestValidator(downloadVideoSchema), videoController.downloadVideo)
+// Download Video
+videoRouter.get(
+  "/download/:workspaceId/:versionId",
+  requestValidator(downloadVideoSchema),
+  videoController.downloadVideo)

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { WorkspaceController } from "../controllers/workspace.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import { requestValidator } from "../middleware/requestValidator";
-import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, getWorkspaceDetailsSchema, createNewVersionSchema } from "../@types/requests/workspace.req";
+import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, getWorkspaceDetailsSchema, createNewVersionSchema, getBranchSchema } from "../@types/requests/workspace.req";
 import { authValidator } from "../middleware/authValidator";
 
 export const wsRouter = Router();
@@ -42,6 +42,13 @@ wsRouter.post(
   "/branches",
   requestValidator(createBranchSchema),
   wsontroller.createBranch
+);
+
+// Get Branch
+wsRouter.get(
+  "/:workspaceId/branches",
+  requestValidator(getBranchSchema),
+  wsontroller.getBranch
 );
 
 // Create Branch

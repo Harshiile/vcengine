@@ -6,6 +6,8 @@ import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
 import { downloadVideoSchema, getMaxResolutionSchema, getPlaylistSchema, uploadVideoSchema } from "../@types/requests/video.req";
+import { spawn } from "child_process";
+import Stream from "stream";
 
 type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
 type downloadVideoParams = z.infer<typeof downloadVideoSchema.shape.params>;
@@ -42,7 +44,7 @@ export class VideoController extends BaseController {
       // const fileName = `${workspace}/${version}/playlist_${resolution}.m3u8`;
       const fileName = `${versionId}/playlist_${resolution}.m3u8`;
 
-      const playlistStream = await this.videoService.getPlaylist(fileName);
+      const playlistStream = await this.videoService.getPlaylist<Stream>(fileName);
 
       res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
       res.setHeader("Cache-Control", "public, max-age=86400, immutable"); // Caching for 1 day

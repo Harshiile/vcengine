@@ -35,6 +35,12 @@ export const createBranchSchema = z.object({
   }),
 });
 
+export const getBranchSchema = z.object({
+  params: z.object({
+    workspaceId: z.string(),
+  }),
+});
+
 export const isWorkspaceUniqueSchema = z.object({
   params: z.object({
     workspaceName: z.string(),

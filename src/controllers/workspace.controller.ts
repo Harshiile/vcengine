@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import z from "zod";
-import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, createNewVersionSchema } from "../@types/requests/workspace.req";
+import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, createNewVersionSchema, getBranchSchema } from "../@types/requests/workspace.req";
 
 type wsCreateBody = z.infer<typeof createWorkspaceSchema.shape.body>;
 type wsOfUserGetParams = z.infer<typeof getWorkspaceOfUserSchema.shape.params>;
 type versionGetParams = z.infer<typeof getVersionsSchema.shape.params>;
 type createBranchBody = z.infer<typeof createBranchSchema.shape.body>;
 type isWorkspaceUniqueParams = z.infer<typeof isWorkspaceUniqueSchema.shape.params>;
+type getBranchParams = z.infer<typeof getBranchSchema.shape.params>;
 export type createNewVersionBody = z.infer<typeof createNewVersionSchema.shape.body>;
 
 export class WorkspaceController extends BaseController {
@@ -73,6 +74,18 @@ export class WorkspaceController extends BaseController {
       const { createdFromVersion, name, workspaceId } = req.body
       await this.workspaceService.createBranch(workspaceId, createdFromVersion, name)
       return { message: "Branch Created !!" }
+    });
+  };
+
+  getBranch = (
+    req: Request<getBranchParams>,
+    res: Response,
+    next: NextFunction
+  ): void => {
+    this.baseRequest(req, res, next, async () => {
+      const { workspaceId } = req.params
+      const { branches } = await this.workspaceService.getBranch(workspaceId)
+      return { branches }
     });
   };
 
