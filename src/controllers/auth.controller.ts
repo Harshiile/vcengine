@@ -84,17 +84,6 @@ export class AuthController extends BaseController {
   };
 
 
-  uploadAvatar = (req: Request<{}, {}, uploadAvatarBody>, res: Response, next: NextFunction): void => {
-    this.baseRequest(req, res, next, async () => {
-
-      // Get signed url from service
-      const { uploadUrl, avatarKey } = await this.authService.uploadAvatar(req.body.contentType)
-
-      return { uploadUrl, avatarKey }
-    })
-  }
-
-
   fetchMe = (req: Request, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
       const user = await this.authService.getUser(req.user);
@@ -127,8 +116,8 @@ export class AuthController extends BaseController {
   // Update User
   updateUser = (req: Request<{}, {}, updateUserBody>, res: Response, next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      const { avatarUrl, name, username } = req.body
-      await this.authService.updateUser(req.user, name, username, avatarUrl);
+      const { avatarUrl, name, bio, location, website } = req.body
+      await this.authService.updateUser(req.user, name, avatarUrl, bio, location, website);
 
       return {
         message: "User Updated!!"

@@ -4,12 +4,12 @@ import { getPrismaInstance } from "../db";
 import { VCError } from "../utils/error";
 import { v4 } from "uuid";
 import { Stream } from "stream";
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { BUCKETS } from "../config/buckets";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../config/s3";
-import z from "zod";
 import { EmailService } from "./mail.service";
+import { ENV } from "../config/env";
 
 export class AuthService {
   private getTokens(email: string, userId: string) {
@@ -158,12 +158,16 @@ export class AuthService {
 
     if (!user) return null;
 
-    const { id, name, username, avatarUrl } = user
+    const { id, name, username, avatarUrl, bio, location, website, createdAt } = user
     return {
       id,
       name,
       username,
-      avatar: avatarUrl
+      bio,
+      createdAt,
+      location,
+      website,
+      avatarUrl
     }
   }
 
@@ -190,22 +194,47 @@ export class AuthService {
   };
 
 
-  async updateUser(userId: string, name: string | undefined, username: string | undefined, avatarUrl: string | undefined) {
+  async updateUser(
+    userId: string,
+    name: string | undefined,
+    avatarUrl: string | undefined,
+    bio: string | undefined,
+    location: string | undefined,
+    website: string | undefined,
+  ) {
     const prisma = getPrismaInstance();
+    let oldAvatarUrl = null;
 
-    if (username) {
-      const isUsernameExist = await this.isUniqueUsername(username)
-      if (isUsernameExist) throw new VCError(409, "Username already exists")
+    if (avatarUrl) {
+      const avatar = await prisma.user.findFirst({
+        where: { id: userId },
+        select: { avatarUrl: true }
+      }).catch(err => { throw err })
+
+      oldAvatarUrl = avatar?.avatarUrl
     }
+
 
     await prisma.user.update({
       where: { id: userId },
       data: {
-        ...(avatarUrl && { avatarUrl }),
-        ...(name && { name }),
-        ...(username && { username }),
+        avatarUrl,
+        name,
+        bio,
+        location,
+        website,
       }
     }).catch(err => { throw err })
+
+
+    if (oldAvatarUrl) {
+      // If avatar changes - Delete old one
+      await s3.send(new DeleteObjectCommand({
+        Bucket: BUCKETS.VC_AVATAR,
+        Key: oldAvatarUrl
+      })).catch(err => { throw err })
+    }
+
   };
 
 

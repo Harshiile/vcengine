@@ -32,7 +32,7 @@ wsRouter.get(
 
 // Get Versions of Workspaces
 wsRouter.get(
-  "/:workspaceId/versions",
+  "/:branchId/versions",
   requestValidator(getVersionsSchema),
   wsontroller.getVersions
 );

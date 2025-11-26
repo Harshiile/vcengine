@@ -106,14 +106,10 @@ export class WorkspaceService {
   }
 
 
-  getVersions = async (workspaceId: string) => {
+  getVersions = async (branchId: string) => {
     const versions = await this.prisma.versions.findMany({
       where: {
-        Videos: {
-          every: {
-            Workspace: { id: workspaceId }
-          }
-        }
+        branch: branchId
       },
       orderBy: { createdAt: "desc" }
     })

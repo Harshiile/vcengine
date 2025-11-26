@@ -1,22 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { WorkspaceType } from "../../../generated/prisma";
+import { ID } from "./ids";
 
 const workspaces = [
   {
-    createdBy: 1,
-    name: "WS One By User-1",
-    type: WorkspaceType.Public,
-  },
-  {
-    createdBy: 1,
-    name: "WS Two by User-1",
+    id: ID.workspace,
+    createBy: ID.user,
+    name: "FirstOne",
     type: WorkspaceType.Private,
-  },
-  {
-    createdBy: 2,
-    name: "WS One By User-2",
-    type: WorkspaceType.Public,
-  },
+    banner: "9dab4f27-db04-443e-bf4e-155552e69d91.jpeg",
+    activeBranch: ID.branch,
+  }
 ];
 
 export const seedWorkspace = async (prisma: PrismaClient) => {

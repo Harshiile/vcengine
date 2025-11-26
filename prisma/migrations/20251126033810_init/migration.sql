@@ -4,12 +4,6 @@ CREATE TYPE "public"."WorkspaceType" AS ENUM ('Public', 'Private');
 -- CreateEnum
 CREATE TYPE "public"."VideoState" AS ENUM ('Processing', 'Uploaded');
 
--- CreateEnum
-CREATE TYPE "public"."changeType" AS ENUM ('Add', 'Modified', 'Revert', 'Remove');
-
--- CreateEnum
-CREATE TYPE "public"."IssuesState" AS ENUM ('Open', 'Closed');
-
 -- CreateTable
 CREATE TABLE "public"."User" (
     "id" TEXT NOT NULL,
@@ -19,6 +13,9 @@ CREATE TABLE "public"."User" (
     "passwordHash" TEXT NOT NULL,
     "refreshToken" TEXT NOT NULL,
     "avatarUrl" TEXT,
+    "website" TEXT,
+    "location" TEXT,
+    "bio" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -84,19 +81,6 @@ CREATE TABLE "public"."Versions" (
     CONSTRAINT "Versions_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "public"."Issues" (
-    "id" TEXT NOT NULL,
-    "issueNumber" INTEGER NOT NULL,
-    "createdBy" TEXT NOT NULL,
-    "workspace" TEXT NOT NULL,
-    "message" TEXT NOT NULL,
-    "state" "public"."IssuesState" NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Issues_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "public"."User"("username");
 
@@ -126,9 +110,3 @@ ALTER TABLE "public"."Versions" ADD CONSTRAINT "Versions_branch_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "public"."Versions" ADD CONSTRAINT "Versions_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Issues" ADD CONSTRAINT "Issues_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Issues" ADD CONSTRAINT "Issues_workspace_fkey" FOREIGN KEY ("workspace") REFERENCES "public"."Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

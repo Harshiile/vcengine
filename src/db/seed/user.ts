@@ -1,27 +1,21 @@
 import { hash } from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+import { ID } from "./ids";
 
 const users = (hashPassword: string) => [
   {
-    id: 1,
-    name: "Abc",
-    username: "abc123",
-    email: "abc@gmail.com",
-    password: hashPassword,
+    id: ID.user,
+    name: "Dymitry Bivol",
+    username: "borz",
+    email: "example@gmail.com",
+    passwordHash: hashPassword,
     refreshToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRoZWhhcnNoaWlsZUBnbWFpbC5jb20iLCJ1c2VybmFtZSI6ImdyYXpvIiwiaWF0IjoxNzU2NTQ1MTEyfQ.eJA83ok7M3tgijB-4oYh0qf350Mge8C3PZdCGKeAooU",
-    avatar: null,
-  },
-  {
-    id: 2,
-    name: "Xyz",
-    username: "xyz123",
-    email: "xyz@gmail.com",
-    password: hashPassword,
-    refreshToken:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRoZWhhcnNoaWlsZUBnbWFpbC5jb20iLCJ1c2VybmFtZSI6ImdyYXpvIiwiaWF0IjoxNzU2NTQ1MTEyfQ.eJA83ok7M3tgijB-4oYh0qf350Mge8C3PZdCGKeAooU",
-    avatar: null,
-  },
+    avatar: "5cf1e900-451f-41cb-b3ce-fefa356451ac.jpeg",
+    website: "haz.onrender.com",
+    location: "Dagestan, Russia",
+    bio: "Orthodox | 5'10''"
+  }
 ];
 
 export const seedUser = async (prisma: PrismaClient) => {

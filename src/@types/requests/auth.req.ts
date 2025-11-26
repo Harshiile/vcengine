@@ -11,9 +11,11 @@ export const loginUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   body: z.object({
-    name: z.string().optional(),
-    username: z.string().optional(),
-    avatarUrl: z.string().optional()
+    name: z.string(),
+    avatarUrl: z.string(),
+    bio: z.string(),
+    website: z.string(),
+    location: z.string(),
   }),
 });
 

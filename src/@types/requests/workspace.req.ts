@@ -23,7 +23,7 @@ export const getWorkspaceDetailsSchema = z.object({
 
 export const getVersionsSchema = z.object({
   params: z.object({
-    workspaceId: z.string(),
+    branchId: z.string(),
   }),
 });
 

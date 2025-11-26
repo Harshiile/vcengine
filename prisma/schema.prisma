@@ -15,17 +15,20 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String
-  username     String   @unique
-  email        String   @unique
+  username     String  @unique
+  email        String  @unique
   passwordHash String
-  refreshToken String   @unique
+  refreshToken String  @unique
   avatarUrl    String?
-  createdAt    DateTime @default(now())
+  website      String?
+  location     String?
+  bio          String?
+
+  createdAt DateTime @default(now())
 
   Workspace Workspace[]
-  Issues    Issues[]
 }
 
 enum WorkspaceType {
@@ -46,7 +49,6 @@ model Workspace {
   Videos   Videos[]
   Branch   Branch[]
   Versions Versions[]
-  Issues   Issues[]
 }
 
 enum VideoState {
@@ -97,29 +99,4 @@ model Versions {
   Branch    Branch    @relation(fields: [branch], references: [id], onDelete: Cascade, onUpdate: Cascade) // If branch deleted then versions also
   Workspace Workspace @relation(fields: [workspace], references: [id]) // If workspace deleted then versions also
   Videos    Videos[]
-}
-
-enum changeType {
-  Add
-  Modified
-  Revert
-  Remove
-}
-
-enum IssuesState {
-  Open
-  Closed
-}
-
-model Issues {
-  id          String      @id @default(uuid())
-  issueNumber Int
-  createdBy   String
-  workspace   String
-  message     String
-  state       IssuesState
-  createdAt   DateTime    @default(now())
-
-  User      User      @relation(fields: [createdBy], references: [id])
-  Workspace Workspace @relation(fields: [workspace], references: [id])
 }

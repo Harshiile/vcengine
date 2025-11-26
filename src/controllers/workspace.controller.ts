@@ -60,7 +60,7 @@ export class WorkspaceController extends BaseController {
     next: NextFunction
   ): void => {
     this.baseRequest(req, res, next, async () => {
-      const { versions } = await this.workspaceService.getVersions(req.params.workspaceId);
+      const { versions } = await this.workspaceService.getVersions(req.params.branchId);
       return { versions }
     });
   };
