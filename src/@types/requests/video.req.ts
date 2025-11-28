@@ -34,3 +34,10 @@ export const downloadVideoSchema = z.object({
     versionId: z.string(),
   })
 })
+
+export const videoStateSchema = z.object({
+  params: z.object({
+    resolution: z.string(),
+    versionId: z.string(),
+  })
+})

@@ -8,6 +8,7 @@ import {
   getPlaylistSchema,
   getSegmentSchema,
   downloadVideoSchema,
+  videoStateSchema,
 } from "../@types/requests/video.req";
 
 export const videoRouter = Router();
@@ -47,3 +48,10 @@ videoRouter.get(
   "/download/:workspaceId/:versionId",
   requestValidator(downloadVideoSchema),
   videoController.downloadVideo)
+
+
+// Video State
+videoRouter.get(
+  "/:versionId/state/:resolution",
+  requestValidator(videoStateSchema),
+  videoController.getVideoState)

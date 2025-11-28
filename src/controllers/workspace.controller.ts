@@ -2,10 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { WorkspaceService } from "../services/workspace.service";
 import z from "zod";
-import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, createNewVersionSchema, getBranchSchema } from "../@types/requests/workspace.req";
+import { getWorkspaceOfUserSchema, createWorkspaceSchema, getVersionsSchema, createBranchSchema, isWorkspaceUniqueSchema, createNewVersionSchema, getBranchSchema, getWorkspaceDetailsSchema } from "../@types/requests/workspace.req";
 
 type wsCreateBody = z.infer<typeof createWorkspaceSchema.shape.body>;
 type wsOfUserGetParams = z.infer<typeof getWorkspaceOfUserSchema.shape.params>;
+type workspaceByParams = z.infer<typeof getWorkspaceDetailsSchema.shape.params>;
 type versionGetParams = z.infer<typeof getVersionsSchema.shape.params>;
 type createBranchBody = z.infer<typeof createBranchSchema.shape.body>;
 type isWorkspaceUniqueParams = z.infer<typeof isWorkspaceUniqueSchema.shape.params>;
@@ -33,11 +34,11 @@ export class WorkspaceController extends BaseController {
     });
   };
 
-  getWorkspaceDetails = (req: Request<wsOfUserGetParams>,
+  getWorkspaceDetails = (req: Request<workspaceByParams>,
     res: Response,
     next: NextFunction): void => {
     this.baseRequest(req, res, next, async () => {
-      const { workspace } = await this.workspaceService.getWorkspaceDetails(req.params.userId);
+      const { workspace } = await this.workspaceService.getWorkspaceDetails(req.params.workspaceId);
       return { workspace }
     });
   }

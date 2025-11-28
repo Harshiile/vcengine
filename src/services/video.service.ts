@@ -84,9 +84,21 @@ export class VideoService {
     return (await this.getStream(segmentKey, BUCKETS.VC_SEGMENTS)) as Stream;
   }
 
-  async getmaxResolution(versionId: string) {
+  async getVideoState(versionId: string, resolution: number) {
+    const prisma = getPrismaInstance()
 
-    const resolutions = await this.prisma.videos.findMany({
+    const state = await prisma.videos.findFirst({
+      where: { version: versionId, height: resolution },
+      select: { state: true }
+    }).catch(err => { throw new VCError(400, err.message) })
+
+    return state?.state
+  }
+
+  async getmaxResolution(versionId: string) {
+    const prisma = getPrismaInstance()
+
+    const resolutions = await prisma.videos.findMany({
       where: { version: versionId },
       select: { height: true }
     }).catch(err => { throw new VCError(400, err.message) })

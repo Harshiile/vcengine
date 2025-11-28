@@ -5,14 +5,16 @@ import fs from "fs";
 import path from "path";
 import { BUCKETS } from "../config/buckets";
 import z from "zod";
-import { downloadVideoSchema, getMaxResolutionSchema, getPlaylistSchema, uploadVideoSchema } from "../@types/requests/video.req";
+import { downloadVideoSchema, getMaxResolutionSchema, getPlaylistSchema, uploadVideoSchema, videoStateSchema } from "../@types/requests/video.req";
 import { spawn } from "child_process";
 import Stream from "stream";
+import { VCError } from "../utils/error";
 
 type uploadVideoBody = z.infer<typeof uploadVideoSchema.shape.body>;
 type downloadVideoParams = z.infer<typeof downloadVideoSchema.shape.params>;
 type getPlaylistParams = z.infer<typeof getPlaylistSchema.shape.params>;
 type getMaxResolutionParams = z.infer<typeof getMaxResolutionSchema.shape.params>;
+type getVideoStateParams = z.infer<typeof videoStateSchema.shape.params>;
 
 export class VideoController extends BaseController {
   constructor(private videoService: VideoService) {
@@ -73,6 +75,17 @@ export class VideoController extends BaseController {
       const { versionId } = req.params;
       const maxResolution = await this.videoService.getmaxResolution(versionId);
       return { maxResolution };
+    });
+  };
+
+  getVideoState = (req: Request<getVideoStateParams>, res: Response, next: NextFunction) => {
+    this.baseRequest(req, res, next, async () => {
+      const { versionId, resolution } = req.params;
+
+      const state = await this.videoService.getVideoState(versionId, Number(resolution));
+      if (!state) throw new VCError(400, "State is not suitable")
+
+      return { state }
     });
   };
 
