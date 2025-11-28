@@ -1,9 +1,15 @@
 import { PrismaClient } from "../../generated/prisma";
 
-const globalPrisma = global as unknown as {
-  prisma: PrismaClient;
+const globalForPrisma = global as unknown as {
+  prisma?: PrismaClient;
 };
 
 export const getPrismaInstance = () => {
-  return globalPrisma.prisma || new PrismaClient();
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient({
+      log: ["warn", "error"],
+    });
+  }
+
+  return globalForPrisma.prisma;
 };
